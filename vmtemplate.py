@@ -288,7 +288,13 @@ class VMTemplate(object):
         networks = ""
         params = {'type': 'network',
                   'model': self.info['nic_model']}
-        for nw in self.info['networks']:
+
+        if os.uname()[4] in ['s390x']:
+            info_networks = self.info.get('networks', [])
+        else:
+            info_networks = self.info['networks']
+
+        for nw in info_networks:
             params['network'] = nw
             networks += get_iface_xml(params, self.info['arch'],
                                       self.info['os_distro'],
@@ -487,7 +493,12 @@ class VMTemplate(object):
     def validate_integrity(self):
         invalid = {}
         # validate networks integrity
-        invalid_networks = list(set(self.info['networks']) -
+        if os.uname()[4] in ['s390x']:
+            networks = self.info.get('networks', [])
+        else:
+            networks = self.info['networks']
+
+        invalid_networks = list(set(networks) -
                                 set(self._get_all_networks_name()))
         if invalid_networks:
             invalid['networks'] = invalid_networks

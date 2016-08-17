@@ -21,6 +21,7 @@ import copy
 import ipaddr
 import libvirt
 import time
+import os
 from libvirt import VIR_INTERFACE_XML_INACTIVE
 
 from wok.exception import InvalidOperation, InvalidParameter
@@ -55,7 +56,11 @@ class NetworksModel(object):
         self.caps = CapabilitiesModel(**kargs)
 
     def _check_default_networks(self):
-        networks = list(set(tmpl_defaults['networks']))
+        if os.uname()[4] in ['s390x']:
+            networks = list(set(tmpl_defaults.get('networks', [])))
+        else:
+            networks = list(set(tmpl_defaults['networks']))
+
         conn = self.conn.get()
 
         for net_name in networks:

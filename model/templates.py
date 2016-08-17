@@ -358,7 +358,10 @@ class LibvirtVMTemplate(VMTemplate):
         return sorted(map(lambda x: x.decode('utf-8'), names))
 
     def _network_validate(self):
-        names = self.info['networks']
+        if os.uname()[4] in ['s390x']:
+            names = self.info.get('networks', [])
+        else:
+            names = self.info['networks']
         for name in names:
             try:
                 conn = self.conn.get()
