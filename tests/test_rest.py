@@ -863,9 +863,11 @@ class RestTests(unittest.TestCase):
             resp = self.request('/plugins/kimchi/storagepools/tmp/deactivate',
                                 {}, 'POST')
             self.assertEquals(200, resp.status)
+
+            # cannot delete storagepool with volumes associate to guests
             resp = self.request('/plugins/kimchi/storagepools/tmp', {},
                                 'DELETE')
-            self.assertEquals(204, resp.status)
+            self.assertEquals(400, resp.status)
 
     def test_vm_iface(self):
 
