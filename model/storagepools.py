@@ -471,6 +471,11 @@ class StoragePoolModel(object):
         if self._pool_used_by_template(name):
             raise InvalidOperation('KCHPOOL0035E', {'name': name})
 
+        vms = self._get_vms_attach_to_storagepool(name)
+        if len(vms) > 0:
+            raise InvalidOperation('KCHPOOL0039E', {'name': name, 
+                                                    'vms': ",".join(vms)})
+
         pool = self.get_storagepool(name, self.conn)
         if pool.isActive():
             raise InvalidOperation("KCHPOOL0005E", {'name': name})
@@ -479,6 +484,22 @@ class StoragePoolModel(object):
         except libvirt.libvirtError as e:
             raise OperationFailed("KCHPOOL0011E",
                                   {'name': name, 'err': e.get_error_message()})
+
+    def _get_vms_attach_to_storagepool(self, storagepool):
+        conn = self.conn.get()
+
+        # get storage pool path
+        stpool = self.get_storagepool(storagepool, self.conn)
+        path = "".join(xpath_get_text(stpool.XMLDesc(), "/pool/target/path"))
+
+        vms = []
+        for dom in conn.listAllDomains(0):
+            xml = dom.XMLDesc(0)
+            files = "/domain/devices/disk/source/@file"
+            for file in xpath_get_text(xml, files):
+                if file.startswith(path):
+                    vms.append(dom.name())
+        return vms
 
 
 class IsoPoolModel(object):
