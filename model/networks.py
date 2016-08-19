@@ -35,6 +35,7 @@ from wok.plugins.kimchi import network as knetwork
 from wok.plugins.kimchi.config import kimchiPaths
 from wok.plugins.kimchi.model.config import CapabilitiesModel
 from wok.plugins.kimchi.osinfo import defaults as tmpl_defaults
+from wok.plugins.kimchi.utils import is_running_on_s390x
 from wok.plugins.kimchi.xmlutils.interface import get_iface_xml
 from wok.plugins.kimchi.xmlutils.network import create_linux_bridge_xml
 from wok.plugins.kimchi.xmlutils.network import create_vlan_tagged_bridge_xml
@@ -55,7 +56,11 @@ class NetworksModel(object):
         self.caps = CapabilitiesModel(**kargs)
 
     def _check_default_networks(self):
-        networks = list(set(tmpl_defaults['networks']))
+        if is_running_on_s390x():
+            networks = list(set(tmpl_defaults.get('networks', [])))
+        else:
+            networks = list(set(tmpl_defaults['networks']))
+
         conn = self.conn.get()
 
         for net_name in networks:
