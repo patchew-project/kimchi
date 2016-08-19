@@ -20,6 +20,7 @@
 
 import contextlib
 import json
+import os
 import platform
 import re
 import sqlite3
@@ -272,3 +273,13 @@ def is_libvirtd_up():
 
     output, error, rc = run_command(cmd, silent=True)
     return True if output == 'active\n' else False
+
+
+def is_running_on_s390x():
+    """
+    Checks if running on s390x.
+    """
+    if os.uname()[4] == 's390x':
+        return True
+    else:
+        return False

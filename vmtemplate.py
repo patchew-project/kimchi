@@ -288,7 +288,13 @@ class VMTemplate(object):
         networks = ""
         params = {'type': 'network',
                   'model': self.info['nic_model']}
-        for nw in self.info['networks']:
+
+        if self.info.get('arch') == 's390x':
+            info_networks = self.info.get('networks', [])
+        else:
+            info_networks = self.info['networks']
+
+        for nw in info_networks:
             params['network'] = nw
             networks += get_iface_xml(params, self.info['arch'],
                                       self.info['os_distro'],
@@ -353,7 +359,7 @@ class VMTemplate(object):
         graphics.update(kwargs.get('graphics', {}))
         # Graphics is not supported on s390x, this check will
         # not add graphics tag in domain xml.
-        if params['arch'] not in ['s390x']:
+        if params.get('arch') != 's390x':
             params['graphics'] = get_graphics_xml(graphics)
 
         libvirt_stream_protocols = kwargs.get('libvirt_stream_protocols', [])
@@ -487,7 +493,12 @@ class VMTemplate(object):
     def validate_integrity(self):
         invalid = {}
         # validate networks integrity
-        invalid_networks = list(set(self.info['networks']) -
+        if self.info.get('arch') == 's390x':
+            networks = self.info.get('networks', [])
+        else:
+            networks = self.info['networks']
+
+        invalid_networks = list(set(networks) -
                                 set(self._get_all_networks_name()))
         if invalid_networks:
             invalid['networks'] = invalid_networks

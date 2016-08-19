@@ -35,6 +35,7 @@ from wok.plugins.kimchi.config import get_kimchi_version
 from wok.plugins.kimchi.kvmusertests import UserTests
 from wok.plugins.kimchi.model.cpuinfo import CPUInfoModel
 from wok.plugins.kimchi.utils import is_libvirtd_up, pool_name_from_uri
+from wok.plugins.kimchi.utils import is_running_on_s390x
 from wok.plugins.kimchi.vmtemplate import VMTemplate
 
 ISO_TYPE = "ISO 9660 CD-ROM"
@@ -358,7 +359,10 @@ class LibvirtVMTemplate(VMTemplate):
         return sorted(map(lambda x: x.decode('utf-8'), names))
 
     def _network_validate(self):
-        names = self.info['networks']
+        if is_running_on_s390x():
+            names = self.info.get('networks', [])
+        else:
+            names = self.info['networks']
         for name in names:
             try:
                 conn = self.conn.get()
