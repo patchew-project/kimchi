@@ -23,8 +23,8 @@ import time
 from lxml import objectify
 from lxml.builder import E
 
+from wok.asynctask import add_task
 from wok.exception import InvalidOperation, NotFoundError, OperationFailed
-from wok.utils import add_task
 from wok.xmlutils.utils import xpath_get_text
 from wok.model.tasks import TaskModel
 

@@ -33,15 +33,15 @@ import unittest
 
 from mock import call, mock_open, patch
 
-import tests.utils as utils
-
 import wok.objectstore
+
+from wok.asynctask import add_task
 from wok.basemodel import Singleton
 from wok.config import config
 from wok.exception import InvalidOperation
 from wok.exception import InvalidParameter, NotFoundError, OperationFailed
 from wok.rollbackcontext import RollbackContext
-from wok.utils import add_task, convert_data_size, get_task_id
+from wok.utils import convert_data_size, get_task_id
 from wok.xmlutils.utils import xpath_get_text
 
 from wok.plugins.gingerbase import netinfo
@@ -54,6 +54,7 @@ from wok.plugins.kimchi.model.virtviewerfile import VMVirtViewerFileModel
 from wok.plugins.kimchi.model.vms import VMModel
 
 import iso_gen
+import tests.utils as utils
 
 
 invalid_repository_urls = ['www.fedora.org',       # missing protocol

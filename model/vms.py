@@ -34,13 +34,14 @@ from lxml import etree, objectify
 from lxml.builder import E
 from xml.etree import ElementTree
 
+from wok.asynctask import add_task
 from wok.config import config
 from wok.exception import InvalidOperation, InvalidParameter
 from wok.exception import NotFoundError, OperationFailed
 from wok.model.tasks import TaskModel
 from wok.rollbackcontext import RollbackContext
-from wok.utils import add_task, convert_data_size
-from wok.utils import import_class, run_setfacl_set_attr, run_command, wok_log
+from wok.utils import convert_data_size, import_class, run_command
+from wok.utils import run_setfacl_set_attr, wok_log
 from wok.xmlutils.utils import dictize, xpath_get_text, xml_item_insert
 from wok.xmlutils.utils import xml_item_remove, xml_item_update
 

@@ -28,9 +28,10 @@ from collections import defaultdict
 from lxml import objectify
 from lxml.builder import E
 
+from wok.asynctask import add_task
 from wok.exception import NotFoundError, OperationFailed
 from wok.objectstore import ObjectStore
-from wok.utils import add_task, convert_data_size
+from wok.utils import convert_data_size
 from wok.xmlutils.utils import xml_item_update
 
 from wok.plugins.kimchi import imageinfo

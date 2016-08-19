@@ -28,12 +28,13 @@ import time
 import urllib2
 from lxml.builder import E
 
+from wok.asynctask import add_task
 from wok.exception import InvalidOperation, InvalidParameter, IsoFormatError
 from wok.exception import MissingParameter, NotFoundError, OperationFailed
-from wok.utils import add_task, get_unique_file_name
-from wok.utils import probe_file_permission_as_user, wok_log
-from wok.xmlutils.utils import xpath_get_text
 from wok.model.tasks import TaskModel
+from wok.utils import get_unique_file_name, probe_file_permission_as_user
+from wok.utils import wok_log
+from wok.xmlutils.utils import xpath_get_text
 
 from wok.plugins.kimchi.config import READONLY_POOL_TYPE
 from wok.plugins.kimchi.isoinfo import IsoImage

@@ -26,12 +26,13 @@ from lxml import etree, objectify
 from lxml.builder import E, ElementMaker
 from operator import itemgetter
 
+from wok.asynctask import add_task
 from wok.exception import InvalidOperation, InvalidParameter, NotFoundError
 from wok.exception import OperationFailed
 from wok.message import WokMessage
 from wok.model.tasks import TaskModel
 from wok.rollbackcontext import RollbackContext
-from wok.utils import add_task, run_command, wok_log
+from wok.utils import run_command, wok_log
 
 from wok.plugins.kimchi.model.config import CapabilitiesModel
 from wok.plugins.kimchi.model.host import DeviceModel, DevicesModel
