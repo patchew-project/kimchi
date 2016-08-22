@@ -68,6 +68,7 @@ class Template(Resource):
             'cdrom': self.info.get('cdrom', None),
             'disks': self.info['disks'],
             'networks': self.info['networks'],
+            'interfaces': self.info.get('interfaces', []),
             'folder': self.info.get('folder', []),
             'graphics': self.info['graphics'],
             'cpu_info': self.info.get('cpu_info')

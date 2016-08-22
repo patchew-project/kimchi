@@ -89,7 +89,29 @@
             },
             "additionalProperties": false,
             "error": "KCHTMPL0030E"
-        }
+        },
+        "interface": {
+             "description": "Host network interface, this indicates whether to configure the host network interface(Ethernet, Bond, VLAN) as direct MacVTap or to configure interface(OVS) as virtual switch to a VM",
+             "type": "object",
+             "properties": {
+                   "type": {
+                       "description": "Type of host network interface. Type should be 'macvtap' for host network interface(Ethernet, Bond, VLAN) to be connected as direct MacVTap and type ovs for openvswitch host network interface to be connected as virtual switch to a VM.",
+                       "type": "string",
+                       "pattern":  "^(macvtap|ovs)$"
+                    },
+                   "name": {
+                       "description": "The host network interface. It should be name of host network interface(Ethernet, Bond, VLAN) for type 'macvtap' and name of host openvswitch bridge interface for type ovs",
+                       "type": "string"
+                    },
+                   "mode": {
+                       "description": "Only applicable for interface type macvtap, to indicates whether packets will be delivered directly to target device(bridge) or to the external bridge(vepa-capable bridge). Optional.",
+                       "type": "string",
+                       "pattern":  "^(bridge|vepa)$"
+                    }
+             },
+            "additionalProperties": false,
+            "error": "KCHTMPL0033E"
+       }
     },
     "properties": {
         "storagepools_create": {
@@ -782,6 +804,11 @@
                     "type": "array",
                     "items": { "type": "string" },
                     "error": "KCHTMPL0017E"
+                },
+                "interfaces": {
+                    "description": "list of host interfaces to be assigned to new VM",
+                    "type": "array",
+                    "items": { "ref": "#/kimchitype/interface" }
                 },
                 "folder": {
                     "description": "Folder",

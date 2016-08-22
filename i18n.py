@@ -159,6 +159,7 @@ messages = {
     "KCHVMIF0009E": _("MAC Address %(mac)s already exists in virtual machine %(name)s"),
     "KCHVMIF0010E": _("Invalid MAC Address"),
     "KCHVMIF0011E": _("Cannot change MAC address of a running virtual machine"),
+    "KCHVMIF0012E": _("Invalid host network interface type (%(type)s). Type should be 'macvtap' for host network interface(Ethernet, Bond, VLAN) to be connected as direct MacVTap and type 'ovs' for openvswitch host network interface to be connected as virtual switch to a VM."),
 
     "KCHTMPL0001E": _("Template %(name)s already exists"),
     "KCHTMPL0002E": _("Source media %(path)s not found"),
@@ -190,6 +191,7 @@ messages = {
     "KCHTMPL0031E": _("Memory value (%(mem)sMiB) must be equal or lesser than maximum memory value (%(maxmem)sMiB)"),
     "KCHTMPL0032E": _("Unable to update template due error: %(err)s"),
     "KCHTMPL0033E": _("Parameter 'disks' requires at least one disk object"),
+    "KCHTMPL0033E": _("Interface expects an object with parameters: 'name', 'type' and 'mode'. Name should be name of host network interface(Ethernet, Bond, VLAN) for type 'macvtap' and name of host openvswitch bridge interface for type ovs. Mode only applicable for interface type macvtap to indicates whether packets will be delivered directly to target device(bridge) or to the external bridge(vepa-capable bridge) and is Optional."),
 
     "KCHPOOL0001E": _("Storage pool %(name)s already exists"),
     "KCHPOOL0002E": _("Storage pool %(name)s does not exist"),
