@@ -28,9 +28,10 @@ from collections import defaultdict
 from lxml import objectify
 from lxml.builder import E
 
+from wok.asynctask import add_task
 from wok.exception import NotFoundError, OperationFailed
 from wok.objectstore import ObjectStore
-from wok.utils import add_task, convert_data_size
+from wok.utils import convert_data_size
 from wok.xmlutils.utils import xml_item_update
 
 from wok.plugins.kimchi import imageinfo
@@ -418,7 +419,7 @@ class MockModel(Model):
         params = {'vm_name': vm_name, 'name': name}
         taskid = add_task(u'/plugins/kimchi/vms/%s/snapshots/%s' %
                           (vm_name, name), self._vmsnapshots_create_task,
-                          self.objstore, params)
+                          params)
         return self.task_lookup(taskid)
 
     def _vmsnapshots_create_task(self, cb, params):

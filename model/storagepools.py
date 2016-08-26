@@ -21,9 +21,10 @@ import libvirt
 import lxml.etree as ET
 from lxml.builder import E
 
+from wok.asynctask import add_task
 from wok.exception import InvalidOperation, MissingParameter
 from wok.exception import NotFoundError, OperationFailed
-from wok.utils import add_task, run_command, wok_log
+from wok.utils import run_command, wok_log
 from wok.xmlutils.utils import xpath_get_text
 
 from wok.plugins.kimchi.config import config, get_kimchi_version, kimchiPaths
@@ -253,7 +254,7 @@ class StoragePoolsModel(object):
         params['path'] = self.scanner.scan_dir_prepare(params['name'])
         scan_params['pool_path'] = params['path']
         task_id = add_task('/plugins/kimchi/storagepools/%s' % ISO_POOL_NAME,
-                           self.scanner.start_scan, self.objstore, scan_params)
+                           self.scanner.start_scan, scan_params)
         # Record scanning-task/storagepool mapping for future querying
         try:
             with self.objstore as session:

@@ -30,8 +30,8 @@ from functools import partial
 from tests.utils import get_free_port, patch_auth, request
 from tests.utils import run_server, wait_task
 
+from wok.asynctask import add_task
 from wok.rollbackcontext import RollbackContext
-from wok.utils import add_task
 
 from wok.plugins.kimchi import mockmodel
 from wok.plugins.kimchi.osinfo import get_template_default
@@ -1305,12 +1305,9 @@ class RestTests(unittest.TestCase):
         )
 
     def test_tasks(self):
-        id1 = add_task('/plugins/kimchi/tasks/1', self._async_op,
-                       model.objstore)
-        id2 = add_task('/plugins/kimchi/tasks/2', self._except_op,
-                       model.objstore)
-        id3 = add_task('/plugins/kimchi/tasks/3', self._intermid_op,
-                       model.objstore)
+        id1 = add_task('/plugins/kimchi/tasks/1', self._async_op)
+        id2 = add_task('/plugins/kimchi/tasks/2', self._except_op)
+        id3 = add_task('/plugins/kimchi/tasks/3', self._intermid_op)
 
         target_uri = urllib2.quote('^/plugins/kimchi/tasks/*', safe="")
         filter_data = 'status=running&target_uri=%s' % target_uri
