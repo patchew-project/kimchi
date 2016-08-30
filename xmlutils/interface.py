@@ -24,6 +24,16 @@ from wok.plugins.kimchi import osinfo
 
 
 def get_iface_xml(params, arch=None, os_distro=None, os_version=None):
+    typ = params.get('type', 'network')
+    if typ == 'network':
+        return get_iface_network_xml(params, arch, os_distro, os_version)
+    elif typ == 'bridge':
+        return get_iface_ovs_xml(params, arch, os_distro, os_version)
+    elif typ == 'direct':
+        return get_iface_macvtap_xml(params, arch, os_distro, os_version)
+
+
+def get_iface_network_xml(params, arch=None, os_distro=None, os_version=None):
     """
     <interface type='network' name='ethX'>
       <start mode='onboot'/>
@@ -60,5 +70,58 @@ def get_iface_xml(params, arch=None, os_distro=None, os_version=None):
     mac = params.get('mac', None)
     if mac is not None:
         interface.append(E.mac(address=mac))
+
+    return ET.tostring(interface, encoding='utf-8', pretty_print=True)
+
+
+def get_iface_macvtap_xml(params, arch=None, os_distro=None, os_version=None):
+    """
+    <interface type="direct">
+      <source dev="bondX" mode="bridge"/>
+      <model type="virtio"/>
+    </interface>
+    """
+    device = params['name']
+    interface = E.interface(type=params['type'])
+    mode = params.get('mode', None)
+    if mode is not None:
+        interface.append(E.source(dev=device, mode=mode))
+    else:
+        interface.append(E.source(dev=device))
+
+    model = params.get('model', None)
+
+    # only append 'model' to the XML if it's been specified as a parameter
+    # otherwise let libvirt use its default value
+    if model is not None:
+        interface.append(E.model(type=model))
+
+    interface.append(E.model(type=model))
+
+    return ET.tostring(interface, encoding='utf-8', pretty_print=True)
+
+
+def get_iface_ovs_xml(params, arch=None, os_distro=None, os_version=None):
+    """
+    <interface type="bridge">
+      <source bridge="vswitchX"/>
+      <virtualport type="openvswitch"/>
+      <model type="virtio"/>
+    </interface>
+    """
+    device = params['name']
+    interface = E.interface(type=params['type'])
+    interface.append(E.source(bridge=device))
+    virtualport_type = params.get('virtualport_type', 'openvswitch')
+    interface.append(E.virtualport(type=virtualport_type))
+
+    model = params.get('model', None)
+
+    # only append 'model' to the XML if it's been specified as a parameter
+    # otherwise let libvirt use its default value
+    if model is not None:
+        interface.append(E.model(type=model))
+
+    interface.append(E.model(type=model))
 
     return ET.tostring(interface, encoding='utf-8', pretty_print=True)
