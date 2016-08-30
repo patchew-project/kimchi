@@ -28,7 +28,8 @@ import urlparse
 
 from wok.exception import InvalidOperation, InvalidParameter
 from wok.exception import NotFoundError, OperationFailed
-from wok.utils import probe_file_permission_as_user, run_setfacl_set_attr
+from wok.utils import probe_file_permission_as_user, run_command
+from wok.utils import run_setfacl_set_attr
 from wok.xmlutils.utils import xpath_get_text
 
 from wok.plugins.kimchi.config import get_kimchi_version
@@ -47,6 +48,7 @@ if os.uname()[4] in ['ppc', 'ppc64', 'ppc64le']:
 
 
 class TemplatesModel(object):
+
     def __init__(self, **kargs):
         self.objstore = kargs['objstore']
         self.conn = kargs['conn']
@@ -142,7 +144,7 @@ class TemplatesModel(object):
                               get_kimchi_version())
         except InvalidOperation:
             raise
-        except Exception, e:
+        except Exception as e:
             raise OperationFailed('KCHTMPL0020E', {'err': e.message})
 
         return name
@@ -171,6 +173,7 @@ class TemplatesModel(object):
 
 
 class TemplateModel(object):
+
     def __init__(self, **kargs):
         self.objstore = kargs['objstore']
         self.conn = kargs['conn']
@@ -198,10 +201,9 @@ class TemplateModel(object):
         # set default name
         subfixs = [v[len(name):] for v in self.templates.get_list()
                    if v.startswith(name)]
-        indexs = [int(v.lstrip("-clone")) for v in subfixs
-                  if v.startswith("-clone") and
-                  v.lstrip("-clone").isdigit()]
-        indexs.sort()
+        indexs = sorted([int(v.lstrip("-clone")) for v in subfixs
+                         if v.startswith("-clone") and
+                         v.lstrip("-clone").isdigit()])
         index = "1" if not indexs else str(indexs[-1] + 1)
         clone_name = name + "-clone" + index
 
@@ -267,7 +269,7 @@ class TemplateModel(object):
 
         except InvalidOperation:
             raise
-        except Exception, e:
+        except Exception as e:
             raise OperationFailed('KCHTMPL0032E', {'err': e.message})
 
         return params['name']
@@ -290,7 +292,7 @@ def validate_memory(memory):
     # memory limit
     if (current > (MAX_MEM_LIM >> 10)) or (maxmem > (MAX_MEM_LIM >> 10)):
         raise InvalidParameter("KCHVM0079E",
-                               {'value': str(MAX_MEM_LIM / (1024**3))})
+                               {'value': str(MAX_MEM_LIM / (1024 ** 3))})
     if (current > host_memory) or (maxmem > host_memory):
         raise InvalidParameter("KCHVM0078E", {'memHost': host_memory})
 
@@ -316,6 +318,7 @@ def validate_memory(memory):
 
 
 class LibvirtVMTemplate(VMTemplate):
+
     def __init__(self, args, scan=False, conn=None):
         self.conn = conn
         netboot = True if 'netboot' in args.keys() else False
@@ -398,16 +401,47 @@ class LibvirtVMTemplate(VMTemplate):
             raise NotFoundError("KCHVOL0002E", {'name': vol,
                                                 'pool': pool})
 
+    def _create_disk_image(self, format_type, path, capacity):
+        """
+        Create a disk image for the Guest
+        Args:
+            format: Format of the storage. e.g. qcow2
+            path: Path where the virtual disk will be created
+            capacity: Capacity of the virtual disk in GBs
+
+        Returns:
+
+        """
+        out, err, rc = run_command(
+            ["/usr/bin/qemu-img", "create", "-f", format_type, "-o",
+             "preallocation=metadata", path, str(capacity) + "G"])
+
+        if rc != 0:
+            raise OperationFailed("KCHTMPL0035E", {'err': err})
+
+        return
+
     def fork_vm_storage(self, vm_uuid):
         # Provision storages:
         vol_list = self.to_volume_list(vm_uuid)
         try:
             for v in vol_list:
-                pool = self._get_storage_pool(v['pool'])
-                # outgoing text to libvirt, encode('utf-8')
-                pool.createXML(v['xml'].encode('utf-8'), 0)
+                if v['pool'] is not None:
+                    pool = self._get_storage_pool(v['pool'])
+                    # outgoing text to libvirt, encode('utf-8')
+                    pool.createXML(v['xml'].encode('utf-8'), 0)
+                else:
+                    capacity = v['capacity']
+                    format_type = v['format']
+                    path = v['path']
+                    self._create_disk_image(
+                        format_type=format_type,
+                        path=path,
+                        capacity=capacity)
+
         except libvirt.libvirtError as e:
             raise OperationFailed("KCHVMSTOR0008E", {'error': e.message})
+
         return vol_list
 
     def set_cpu_info(self):

@@ -42,8 +42,7 @@ from wok.plugins.kimchi.kvmusertests import UserTests
 from wok.plugins.kimchi.model.diskutils import get_disk_used_by
 from wok.plugins.kimchi.model.diskutils import set_disk_used_by
 from wok.plugins.kimchi.model.storagepools import StoragePoolModel
-from wok.plugins.kimchi.utils import get_next_clone_name
-
+from wok.plugins.kimchi.utils import get_next_clone_name, is_s390x
 
 VOLUME_TYPE_MAP = {0: 'file',
                    1: 'block',
@@ -276,8 +275,11 @@ class StorageVolumeModel(object):
         self.task = TaskModel(**kargs)
         self.storagevolumes = StorageVolumesModel(**kargs)
         self.storagepool = StoragePoolModel(**kargs)
-        if self.conn.get() is not None:
-            self.libvirt_user = UserTests().probe_user()
+        if is_s390x():  # s390x specific handling
+            if self.conn.get() is not None:
+                self.libvirt_user = UserTests().probe_user()
+            else:
+                self.libvirt_user = None
         else:
             self.libvirt_user = None
 

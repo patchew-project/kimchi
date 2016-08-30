@@ -61,13 +61,13 @@ from wok.plugins.kimchi.model.utils import remove_metadata_node
 from wok.plugins.kimchi.model.utils import set_metadata_node
 from wok.plugins.kimchi.osinfo import defaults, MEM_DEV_SLOTS
 from wok.plugins.kimchi.screenshot import VMScreenshot
-from wok.plugins.kimchi.utils import get_next_clone_name
+from wok.plugins.kimchi.utils import get_next_clone_name, is_s390x
 from wok.plugins.kimchi.utils import template_name_from_uri
 from wok.plugins.kimchi.xmlutils.bootorder import get_bootorder_node
 from wok.plugins.kimchi.xmlutils.bootorder import get_bootmenu_node
 from wok.plugins.kimchi.xmlutils.cpu import get_topology_xml
 from wok.plugins.kimchi.xmlutils.disk import get_vm_disk_info, get_vm_disks
-from utils import has_cpu_numa, set_numa_memory
+from .utils import has_cpu_numa, set_numa_memory
 
 
 DOM_STATE_MAP = {0: 'nostate',
@@ -115,6 +115,7 @@ vm_locks = {}
 
 
 class VMsModel(object):
+
     def __init__(self, **kargs):
         self.conn = kargs['conn']
         self.objstore = kargs['objstore']
@@ -232,6 +233,7 @@ class VMsModel(object):
 
 
 class VMModel(object):
+
     def __init__(self, **kargs):
         self.conn = kargs['conn']
         self.objstore = kargs['objstore']
@@ -374,7 +376,7 @@ class VMModel(object):
             vir_dom = self.get_vm(name, self.conn)
             flags = libvirt.VIR_DOMAIN_XML_SECURE
             xml = vir_dom.XMLDesc(flags).decode('utf-8')
-        except libvirt.libvirtError, e:
+        except libvirt.libvirtError as e:
             raise OperationFailed('KCHVM0035E', {'name': name,
                                                  'err': e.message})
 
@@ -408,7 +410,7 @@ class VMModel(object):
                 vir_conn = self.conn.get()
                 dom = vir_conn.defineXML(xml)
                 self._update_metadata_name(dom, nonascii_name)
-            except libvirt.libvirtError, e:
+            except libvirt.libvirtError as e:
                 raise OperationFailed('KCHVM0035E', {'name': name,
                                                      'err': e.message})
 
@@ -481,7 +483,7 @@ class VMModel(object):
 
                 orig_pool_name = vir_pool.name().decode('utf-8')
                 orig_vol_name = vir_orig_vol.name().decode('utf-8')
-            except libvirt.libvirtError, e:
+            except libvirt.libvirtError as e:
                 raise OperationFailed('KCHVM0035E', {'name': domain_name,
                                                      'err': e.message})
 
@@ -1367,7 +1369,7 @@ class VMModel(object):
         # "OperationFailed" in that case.
         try:
             snapshot_names = self.vmsnapshots.get_list(name)
-        except OperationFailed, e:
+        except OperationFailed as e:
             wok_log.error('cannot list snapshots: %s; '
                           'skipping snapshot deleting...' % e.message)
         else:
@@ -1395,6 +1397,14 @@ class VMModel(object):
             except libvirt.libvirtError as e:
                 wok_log.error('Unable to get storage volume by path: %s' %
                               e.message)
+                try:
+                    if is_s390x():  # s390x specific handling
+                        if os.path.exists(path):
+                            os.remove(path)
+                except Exception as e:
+                    wok_log.error('Unable to delete storage path: %s' %
+                                  e.message)
+
             except Exception as e:
                 raise OperationFailed('KCHVOL0017E', {'err': e.message})
 
@@ -1539,7 +1549,7 @@ class VMModel(object):
                 raise OperationFailed("KCHVM0081E",
                                       {'dir': serialconsole.BASE_DIRECTORY})
 
-        websocket.add_proxy_token(name.encode('utf-8')+'-console',
+        websocket.add_proxy_token(name.encode('utf-8') + '-console',
                                   os.path.join(serialconsole.BASE_DIRECTORY,
                                                name.encode('utf-8')), True)
 
@@ -1597,7 +1607,7 @@ class VMModel(object):
 
         try:
             vir_dom.suspend()
-        except libvirt.libvirtError, e:
+        except libvirt.libvirtError as e:
             raise OperationFailed('KCHVM0038E', {'name': name,
                                                  'err': e.message})
 
@@ -1618,7 +1628,7 @@ class VMModel(object):
 
         try:
             vir_dom.resume()
-        except libvirt.libvirtError, e:
+        except libvirt.libvirtError as e:
             raise OperationFailed('KCHVM0040E', {'name': name,
                                                  'err': e.message})
 
@@ -1658,7 +1668,7 @@ class VMModel(object):
                         'destarch': dest_arch
                     }
                 )
-        except Exception, e:
+        except Exception as e:
             raise OperationFailed("KCHVM0066E", {'error': e.message})
 
         finally:
@@ -1769,7 +1779,7 @@ class VMModel(object):
                 ssh_client,
                 id_rsa_data
             )
-        except Exception, e:
+        except Exception as e:
             raise OperationFailed(
                 "KCHVM0068E",
                 {'host': remote_host, 'user': user, 'error': e.message}
@@ -1834,7 +1844,7 @@ class VMModel(object):
             conn = self.conn.get()
             vol_obj = conn.storageVolLookupByPath(disk_path)
             return vol_obj.info()[1]
-        except Exception, e:
+        except Exception as e:
             raise OperationFailed(
                 "KCHVM0062E",
                 {'path': disk_path, 'error': e.message}
@@ -1949,6 +1959,7 @@ class VMModel(object):
 
 
 class VMScreenshotModel(object):
+
     def __init__(self, **kargs):
         self.objstore = kargs['objstore']
         self.conn = kargs['conn']
@@ -1995,6 +2006,7 @@ class VMScreenshotModel(object):
 
 
 class LibvirtVMScreenshot(VMScreenshot):
+
     def __init__(self, vm_uuid, conn):
         VMScreenshot.__init__(self, vm_uuid)
         self.conn = conn
@@ -2004,7 +2016,7 @@ class LibvirtVMScreenshot(VMScreenshot):
             fd = opaque
             os.write(fd, buf)
 
-        fd = os.open(thumbnail, os.O_WRONLY | os.O_TRUNC | os.O_CREAT, 0644)
+        fd = os.open(thumbnail, os.O_WRONLY | os.O_TRUNC | os.O_CREAT, 0o644)
         try:
             conn = self.conn.get()
             dom = conn.lookupByUUIDString(self.vm_uuid)

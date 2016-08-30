@@ -146,6 +146,12 @@ def _get_tmpl_defaults():
                                'maxmemory': _get_default_template_mem()}
     tmpl_defaults['storage']['disk.0'] = {'size': 10, 'format': 'qcow2',
                                           'pool': 'default'}
+    is_on_s390x = True if _get_arch() == 's390x' else False
+
+    if is_on_s390x:
+        tmpl_defaults['storage']['disk.0']['path'] = '/var/lib/libvirt/images/'
+        del tmpl_defaults['storage']['disk.0']['pool']
+
     tmpl_defaults['processor']['vcpus'] = 1
     tmpl_defaults['processor']['maxvcpus'] = 1
     tmpl_defaults['graphics'] = {'type': 'vnc', 'listen': '127.0.0.1'}
@@ -153,7 +159,12 @@ def _get_tmpl_defaults():
     default_config = ConfigObj(tmpl_defaults)
 
     # Load template configuration file
-    config_file = os.path.join(kimchiPaths.sysconf_dir, 'template.conf')
+    if is_on_s390x:
+        config_file = os.path.join(
+            kimchiPaths.sysconf_dir,
+            'template_s390x.conf')
+    else:
+        config_file = os.path.join(kimchiPaths.sysconf_dir, 'template.conf')
     config = ConfigObj(config_file)
 
     # Merge default configuration with file configuration
@@ -174,11 +185,39 @@ def _get_tmpl_defaults():
     # Parse storage section to get disks values
     storage_section = default_config.pop('storage')
     defaults['disks'] = []
-    for disk in storage_section.keys():
+
+    pool_exists = False
+    path_exists = False
+    for index, disk in enumerate(storage_section.keys()):
         data = storage_section[disk]
         data['index'] = int(disk.split('.')[1])
-        data['pool'] = {"name": '/plugins/kimchi/storagepools/' +
-                        storage_section[disk].pop('pool')}
+        # Right now 'Path' is only supported on s390x
+        if storage_section[disk].get('path') and is_on_s390x:
+            path_exists = True
+            data['path'] = storage_section[disk].pop('path')
+            if 'size' not in storage_section[disk]:
+                data['size'] = tmpl_defaults['storage']['disk.0']['size']
+            else:
+                data['size'] = storage_section[disk].pop('size')
+
+            if 'format' not in storage_section[disk]:
+                data['format'] = tmpl_defaults['storage']['disk.0']['format']
+            else:
+                data['format'] = storage_section[disk].pop('format')
+
+        if storage_section[disk].get('pool'):
+            pool_exists = True
+            data['pool'] = {"name": '/plugins/kimchi/storagepools/' +
+                                    storage_section[disk].pop('pool')}
+
+        # If both pool and path don't exist, pick the defaults
+        if index == len(storage_section.keys()) - 1 and \
+                (not pool_exists and not path_exists):
+            if is_on_s390x:  # Special handling for s390x
+                data['path'] = tmpl_defaults['storage']['disk.0']['path']
+            else:
+                data['pool'] = {"name": '/plugins/kimchi/storagepools/default'}
+
         defaults['disks'].append(data)
 
     # Parse processor section to get vcpus and cpu_topology values

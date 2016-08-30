@@ -33,7 +33,7 @@ from wok.plugins.kimchi.model.host import DeviceModel
 from wok.plugins.kimchi.model.libvirtstoragepool import StoragePoolDef
 from wok.plugins.kimchi.osinfo import defaults as tmpl_defaults
 from wok.plugins.kimchi.scan import Scanner
-from wok.plugins.kimchi.utils import pool_name_from_uri
+from wok.plugins.kimchi.utils import pool_name_from_uri, is_s390x
 
 
 ISO_POOL_NAME = u'kimchi_isos'
@@ -57,6 +57,7 @@ STORAGE_SOURCES = {'netfs': {'addr': '/pool/source/host/@name',
 
 
 class StoragePoolsModel(object):
+
     def __init__(self, **kargs):
         self.conn = kargs['conn']
         self.objstore = kargs['objstore']
@@ -72,6 +73,11 @@ class StoragePoolsModel(object):
     def _check_default_pools(self):
         pools = {}
 
+        if 'disks' not in tmpl_defaults or len(tmpl_defaults['disks']) == 0 \
+                or (not tmpl_defaults.get('disks')[0].get(
+                'pool') and is_s390x()):  # s390x specific handling
+            return
+        tmpl_defaults.get('disks')
         default_pool = tmpl_defaults['disks'][0]['pool']['name']
         default_pool = default_pool.split('/')[-1]
 
@@ -437,9 +443,10 @@ class StoragePoolModel(object):
             for tmpl in templates:
                 t_info = session.get('template', tmpl)
                 for disk in t_info['disks']:
-                    t_pool = disk['pool']['name']
-                    if pool_name_from_uri(t_pool) == pool_name:
-                        return True
+                    if 'pool' in disk:
+                        t_pool = disk['pool']['name']
+                        if pool_name_from_uri(t_pool) == pool_name:
+                            return True
             return False
 
     def deactivate(self, name):

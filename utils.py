@@ -24,6 +24,7 @@ import platform
 import re
 import sqlite3
 import time
+import os
 import urllib2
 from httplib import HTTPConnection, HTTPException
 from urlparse import urlparse
@@ -272,3 +273,15 @@ def is_libvirtd_up():
 
     output, error, rc = run_command(cmd, silent=True)
     return True if output == 'active\n' else False
+
+
+def is_s390x():
+    """
+    Check if current arch is 's390x'
+    Returns:
+
+    """
+    if os.uname()[4] == 's390x':
+        return True
+
+    return False
