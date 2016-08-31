@@ -44,7 +44,6 @@ from wok.plugins.kimchi.model.diskutils import set_disk_used_by
 from wok.plugins.kimchi.model.storagepools import StoragePoolModel
 from wok.plugins.kimchi.utils import get_next_clone_name
 
-
 VOLUME_TYPE_MAP = {0: 'file',
                    1: 'block',
                    2: 'directory',

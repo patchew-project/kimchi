@@ -427,6 +427,7 @@ A interface represents available network interface on VM.
           over current will be used exclusively for memory hotplug
     * cdrom: A volume name or URI to an ISO image
     * storagepool: URI of the storagepool where template allocates vm storage.
+    * path : Storage path to store virtual disks without libvirt
     * networks *(optional)*: list of networks will be assigned to the new VM.
     * disks: An array of requested disks with the following optional fields
       (either *size* or *volume* must be specified):
@@ -481,6 +482,7 @@ A interface represents available network interface on VM.
         * format: Format of the image. Valid formats: qcow, qcow2, qed, raw, vmdk, vpc.
         * pool: Storage pool information
             * name: URI of the storagepool where template allocates vm disk.
+        * path (optional): Either pool or path to store the virtual disks should be specified
     * graphics *(optional)*: A dict of graphics paramenters of this template
         * type: The type of graphics. It can be VNC or spice or None.
             * vnc: Graphical display using the Virtual Network
