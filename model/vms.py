@@ -80,12 +80,13 @@ DOM_STATE_MAP = {0: 'nostate',
                  7: 'pmsuspended'}
 
 # update parameters which are updatable when the VM is online
-VM_ONLINE_UPDATE_PARAMS = ['graphics', 'groups', 'memory', 'users']
+VM_ONLINE_UPDATE_PARAMS = ['graphics', 'groups', 'memory', 'users',
+                           'autostart']
 
 # update parameters which are updatable when the VM is offline
 VM_OFFLINE_UPDATE_PARAMS = ['cpu_info', 'graphics', 'groups', 'memory',
                             'name', 'users', 'bootorder', 'bootmenu',
-                            'description', 'title']
+                            'description', 'title', 'autostart']
 
 XPATH_DOMAIN_DISK = "/domain/devices/disk[@device='disk']/source/@file"
 XPATH_DOMAIN_DISK_BY_FILE = "./devices/disk[@device='disk']/source[@file='%s']"
@@ -270,6 +271,9 @@ class VMModel(object):
 
         with lock:
             dom = self.get_vm(name, self.conn)
+            if "autostart" in params:
+                dom.setAutostart(1 if params['autostart'] == True else 0)
+
             # You can only change <maxMemory> offline, updating guest XML
             if ("memory" in params) and ('maxmemory' in params['memory']) and\
                (DOM_STATE_MAP[dom.info()[0]] != 'shutoff'):
@@ -1314,7 +1318,8 @@ class VMModel(object):
                 'access': 'full',
                 'persistent': True if dom.isPersistent() else False,
                 'bootorder': boot,
-                'bootmenu': bootmenu
+                'bootmenu': bootmenu,
+                'autostart': dom.autostart()
                 }
 
     def _vm_get_disk_paths(self, dom):

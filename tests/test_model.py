@@ -1362,6 +1362,12 @@ class ModelTests(unittest.TestCase):
             inst.vm_update(u'пeω-∨м', {"bootmenu": False})
             self.assertEquals("no", inst.vm_lookup(u'пeω-∨м')['bootmenu'])
 
+            # enable/disable autostart
+            inst.vm_update(u'пeω-∨м', {"autostart": True})
+            self.assertEquals("yes", inst.vm_lookup(u'пeω-∨м')['autostart'])
+            inst.vm_update(u'пeω-∨м', {"autostart": False})
+            self.assertEquals("no", inst.vm_lookup(u'пeω-∨м')['autostart'])
+
     def test_get_interfaces(self):
         inst = model.Model('test:///default',
                            objstore_loc=self.tmp_store)
