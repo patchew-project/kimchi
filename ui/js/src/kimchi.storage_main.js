@@ -310,6 +310,14 @@ kimchi.storageBindClick = function() {
         $('.pool-delete').on('click', function(event) {
             event.preventDefault();
             var $pool = $(this);
+            var in_use = $pool.data('inuse');
+            if ('active' === $pool.data('stat') || in_use) {
+                $pool.parent().addClass('disabled');
+                return false;
+            } else {
+                $pool.parent().removeClass('disabled');
+            }
+
             var settings = {
                 title : i18n['KCHAPI6001M'],
                 content : i18n['KCHPOOL6001M'],
@@ -339,6 +347,15 @@ kimchi.storageBindClick = function() {
         $('.pool-deactivate').on('click', function(event) {
             event.preventDefault();
             var poolName = $(this).data('name');
+            var $poolDeactivate = $(this);
+            var in_use = $poolDeactivate.data('inuse');
+            if (in_use) {
+                $poolDeactivate.parent().addClass('disabled');
+                return false;
+            } else {
+                $poolDeactivate.parent().removeClass('disabled');
+            }
+
             var settings = {
                 title : i18n['KCHAPI6001M'],
                 content : i18n['KCHPOOL6012M'],
