@@ -294,6 +294,10 @@
   font-size: 32px;
 }
 
+strong {
+  border-bottom: 1px dotted;
+}
+
 #guest-add-window .modal-body {
   margin: 0;
   padding: 0;
