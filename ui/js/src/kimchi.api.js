@@ -596,6 +596,35 @@ var kimchi = {
         });
     },
 
+        listmacvtapNetworks : function(suc, err) {
+            wok.requestJSON({
+                url : 'plugins/kimchi/interfaces?type=^nic|bonding|vlan$',
+                type : 'GET',
+                contentType : 'application/json',
+                dataType : 'json',
+                resend : true,
+                success : suc,
+                error : err ? err : function(data) {
+                    wok.message.error(data.responseJSON.reason);
+                }
+            });
+        },
+
+            listovsNetworks : function(suc, err) {
+                wok.requestJSON({
+                    url : 'plugins/kimchi/ovsbridges',
+                    type : 'GET',
+                    contentType : 'application/json',
+                    dataType : 'json',
+                    resend : true,
+                    success : suc,
+                    error : err ? err : function(data) {
+                        wok.message.error(data.responseJSON.reason);
+                    }
+                });
+            },
+
+
     toggleNetwork : function(name, on, suc, err) {
         var action = on ? "activate" : "deactivate";
         wok.requestJSON({
@@ -627,6 +656,20 @@ var kimchi = {
     getInterfaces : function(suc, err) {
         wok.requestJSON({
             url : 'plugins/kimchi/interfaces?_inuse=false',
+            type : 'GET',
+            contentType : 'application/json',
+            dataType : 'json',
+            resend : true,
+            success : suc,
+            error : err ? err : function(data) {
+                wok.message.error(data.responseJSON.reason);
+            }
+        });
+    },
+
+    gets390xInterfaces : function(suc, err) {
+        wok.requestJSON({
+            url : 'plugins/kimchi/interfaces?type=^nic|bonding|vlan$',
             type : 'GET',
             contentType : 'application/json',
             dataType : 'json',
@@ -1271,3 +1314,18 @@ var kimchi = {
         });
     }
 };
+
+/**
+ * Get the host information.
+ */
+kimchi.getHostDetails = function (suc,err) {
+  wok.requestJSON({
+      url : 'plugins/gingerbase/host',
+      type : 'GET',
+      resend: true,
+      contentType : 'application/json',
+      dataType : 'json',
+      success : suc,
+      error: err
+  });
+}
