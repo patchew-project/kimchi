@@ -129,7 +129,7 @@ class ModelTests(unittest.TestCase):
         keys = set(('name', 'state', 'stats', 'uuid', 'memory', 'cpu_info',
                     'screenshot', 'icon', 'graphics', 'users', 'groups',
                     'access', 'persistent', 'bootorder', 'bootmenu', 'title',
-                    'description'))
+                    'description', 'autostart'))
 
         stats_keys = set(('cpu_utilization', 'mem_utilization',
                           'net_throughput', 'net_throughput_peak',
@@ -1357,6 +1357,12 @@ class ModelTests(unittest.TestCase):
             self.assertEquals("yes", inst.vm_lookup(u'пeω-∨м')['bootmenu'])
             inst.vm_update(u'пeω-∨м', {"bootmenu": False})
             self.assertEquals("no", inst.vm_lookup(u'пeω-∨м')['bootmenu'])
+
+            # enable/disable autostart
+            inst.vm_update(u'пeω-∨м', {"autostart": True})
+            self.assertEquals(1, inst.vm_lookup(u'пeω-∨м')['autostart'])
+            inst.vm_update(u'пeω-∨м', {"autostart": False})
+            self.assertEquals(0, inst.vm_lookup(u'пeω-∨м')['autostart'])
 
     def test_get_interfaces(self):
         inst = model.Model('test:///default',
