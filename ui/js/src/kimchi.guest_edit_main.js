@@ -21,6 +21,7 @@ kimchi.guest_edit_main = function() {
     var guestEditForm = $('#form-guest-edit-general');
     var saveButton = $('#guest-edit-button-save');
     clearTimeout(kimchi.vmTimeout);
+    var bootOrderOptions = [];
 
     $('#modalWindow').on('hidden.bs.modal', function() {
         kimchi.setListVMAutoTimeout();
@@ -40,10 +41,11 @@ kimchi.guest_edit_main = function() {
 
     var submitForm = function(event) {
 
-        // tap map, "general": 0, "storage": 1, "interface": 2, "permission": 3, "password": 4
+        // tap map, "general": 0, "storage": 1, "interface": 2, "permission": 3, "pci": 4, "snapshot": 5, "bootOrder": 6
         var submit_map = {
             0: generalSubmit,
-            3: permissionSubmit
+            3: permissionSubmit,
+            6: bootOrderSubmit
         };
         var currentTab = $('#guest-edit-window li.active a[data-toggle="tab"]').data('id');
         var toSubmit = parseInt($('#'+currentTab).index());
@@ -729,6 +731,42 @@ kimchi.guest_edit_main = function() {
         }
     };
 
+    var setupBootOrder = function(guest) {
+        var guestBootOrder = guest['bootorder'];
+        $("#myList").empty();
+        $.each(guestBootOrder, function(index, value) {
+           var itemNode = $.parseHTML("<li class='list-group-item' " + "data-value=" + value + ">" + value + "</li>");
+           $("#myList").append(itemNode);
+        });
+
+        $('.boot-order').sortable({
+            items: 'li',
+            cursor: 'move',
+            opacity: 0.6,
+            containment: "parent",
+            start: function(event, ui) {
+                $(this).addClass('focus');
+            },
+            stop: function(event, ui) {
+                $(this).removeClass('focus');
+            },
+            change: function(event, ui) {
+                // callback once started changing order
+            },
+            update: function(event, ui) {
+                // callback once finished order
+                $(saveButton).prop('disabled', false);
+                bootOrderOptions = [];
+                $("#myList li").each(function() {
+                    bootOrderOptions.push($(this).text())
+                });
+                bootOrderOptions.forEach(function(entry) {
+                    console.log(entry);
+                });
+            }
+        });
+    };
+
     var initContent = function(guest) {
         guest['vcpus'] = guest.cpu_info['vcpus'];
         guest['max-processor'] = guest.cpu_info['maxvcpus'];
@@ -791,6 +829,7 @@ kimchi.guest_edit_main = function() {
         setupPermission();
         setupPCIDevice();
         setupSnapshot();
+        setupBootOrder(guest);
 
         wok.topic('kimchi/vmCDROMAttached').subscribe(onAttached);
         wok.topic('kimchi/vmCDROMReplaced').subscribe(onReplaced);
@@ -955,5 +994,29 @@ kimchi.guest_edit_main = function() {
                 $(saveButton).prop('disabled', false);
             }
         }
+    };
+   
+    var bootOrderSubmit = function(event) {
+        //Format the strings to go in the array before passing in to the API
+        //"hd", "network", "cdrom"
+        var formattedBootOrderOptions = [];
+        for (var i=0; i<bootOrderOptions.length; i++) {
+            var str = bootOrderOptions[i].trim();
+            str = str.toLowerCase();
+            if (str === "hdd") {
+                str = "hd";
+            } else if (str === "cd-rom") {
+                str = "cdrom";
+            }
+            formattedBootOrderOptions.push(str);
+        }
+        var data = {
+            bootorder: formattedBootOrderOptions
+        };
+        kimchi.updateVM(kimchi.selectedGuest, data, function() {
+            wok.window.close();
+        }, function(err) {
+            wok.message.error(err.responseJSON.reason,'#alert-modal-container');
+        });
     };
 };

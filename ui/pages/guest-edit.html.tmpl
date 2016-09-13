@@ -37,6 +37,7 @@
     <li role="presentation"><a href="#form-guest-edit-permission" aria-controls="form-guest-edit-permission" role="tab" data-id="form-guest-edit-permission" data-toggle="tab">Permission</a></li>
     <li role="presentation"><a href="#form-guest-edit-pci" aria-controls="form-guest-edit-pci" role="form-guest-edit-pci" data-id="form-guest-edit-pci" data-toggle="tab">Pci</a></li>
     <li role="presentation"><a href="#form-guest-edit-snapshot" aria-controls="form-guest-edit-snapshot" role="tab" data-id="form-guest-edit-snapshot" data-toggle="tab">Snapshot</a></li>
+    <li role="presentation"><a href="#form-guest-edit-boot-order" aria-controls="form-guest-edit-boot-order" role="tab" data-id="form-guest-edit-boot-order" data-toggle="tab">Boot Order</a></li>
   </ul>
         <div class="tab-content" id="guest-edit-tabs">
             <form role="tabpanel" class="tab-pane active" id="form-guest-edit-general">
@@ -181,6 +182,19 @@
                 </div>
                 <div class="task"></div>
                 <div class="body"></div>
+            </form>
+            <form role="tabpanel" class="tab-pane" id="form-guest-edit-boot-order">
+                <div class="form-group">
+                    <div id="bootOrder">
+                        <ul id="myList" class="list-group boot-order">
+                            <li class="list-group-item" data-value="CD-ROM">CD-ROM</li>
+                            <li class="list-group-item" data-value="HDD">HDD</li>
+                            <li class="list-group-item" data-value="Network">Network</li>
+                        </ul>
+                        <p class="help-block">
+                            <i class="fa fa-info-circle"></i> $_("Change the boot order by dragging the items on the list.")</p>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
