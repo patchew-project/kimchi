@@ -858,7 +858,7 @@ class VMModel(object):
             new_xml = self._update_memory_config(new_xml, params, dom)
 
         # update bootorder or bootmenu
-        if "bootorder" or "bootmenu" in params:
+        if ("bootorder" or "bootmenu") in params:
             new_xml = self._update_bootorder(new_xml, params)
 
         snapshots_info = []
