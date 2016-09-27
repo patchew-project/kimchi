@@ -109,6 +109,11 @@ kimchi.setupNetworkFormEvent = function() {
             wok.message.warn(i18n['KCHNET6001W'],'#alert-modal-container');
     }
     $('#bridgedContent').hide();
+    // remove network type passthrough and vepa on s390x only as its not supported.
+    if(kimchi.hostarch == kimchi.s390xArch){
+        $("#networkType option[value='passthrough']").remove();
+        $("#networkType option[value='vepa']").remove();
+    }
     $("#networkName").on("keyup", function(event) {
         $("#networkName").toggleClass("invalid-field", !$("#networkName").val().match(/^[^\"\/]+$/));
         kimchi.updateNetworkFormButton();

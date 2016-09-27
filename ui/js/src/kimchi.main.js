@@ -36,3 +36,5 @@ kimchi.getCapabilities(function(result) {
 $(function(){
     $('body').removeClass('wok-list wok-gallery');
 });
+
+kimchi.s390xArch = "s390x"

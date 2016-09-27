@@ -51,6 +51,9 @@ kimchi.initNetworkListView = function() {
             network.interface.join();
             network.addrSpace = data[i].subnet ? data[i].subnet : null;
             network.persistent = data[i].persistent;
+            if(kimchi.hostarch == kimchi.s390xArch && $.inArray(network.type, [kimchi.NETWORK_TYPE_PASSTHROUGH, kimchi.NETWORK_TYPE_VEPA]) != -1){
+                continue;
+            }
             kimchi.addNetworkItem(network);
         }
         $('#networkGrid').dataGrid({enableSorting: false});
