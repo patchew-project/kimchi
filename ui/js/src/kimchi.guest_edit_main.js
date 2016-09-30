@@ -421,49 +421,54 @@ kimchi.guest_edit_main = function() {
 
         };
 
-
-        kimchi.listNetworks(function(data) {
+        var listNetworks = function(data) {
             for (var i = 0; i < data.length; i++) {
                 var isSlected = i === 0 ? " selected" : "";
                 networkOptions += "<option" + isSlected + ">" + data[i].name + "</option>";
             }
+            kimchi.getGuestInterfaces(kimchi.selectedGuest, function(data) {
+                for (var i = 0; i < data.length; i++) {
+                    data[i].viewMode = "";
+                    data[i].editMode = "hide";
+                    data[i].id = i;
+                    if (data[i].type == 'network')
+                        addItem(data[i]);
+                }
+            });
+        }
 
-            if (kimchi.hostarch === s390xArch) {
-
-                kimchi.listmacvtapNetworks(function(data) {
+        var listNetworks390x = function(data) {
+            for (var i = 0; i < data.length; i++) {
+                var isSlected = i === 0 ? " selected" : "";
+                networkOptions += "<option" + isSlected + ">" + data[i].name + "</option>";
+            }
+            kimchi.listmacvtapNetworks(function(data) {
+                for (var i = 0; i < data.length; i++) {
+                    var isSlected = i === 0 ? ' selected="selected"' : "";
+                    macvtapNetworks += "<option" + isSlected + ">" + data[i].name + "</option>";
+                }
+                kimchi.listovsNetworks(function(data) {
                     for (var i = 0; i < data.length; i++) {
-                        var isSlected = i === 0 ? ' selected="selected"' : "";
-                        macvtapNetworks += "<option" + isSlected + ">" + data[i].name + "</option>";
+                        var isSlected = i === 0 ? " selected" : "";
+                        ovsNetworks += "<option" + isSlected + ">" + data[i] + "</option>";
                     }
-
-                    kimchi.listovsNetworks(function(data) {
+                    kimchi.getGuestInterfaces(kimchi.selectedGuest, function(data) {
                         for (var i = 0; i < data.length; i++) {
-                            var isSlected = i === 0 ? " selected" : "";
-                            ovsNetworks += "<option" + isSlected + ">" + data[i] + "</option>";
+                            data[i].viewMode = "";
+                            data[i].editMode = "hide";
+                            data[i].id = i;
+                            addItem(data[i]);
                         }
-
-                        kimchi.getGuestInterfaces(kimchi.selectedGuest, function(data) {
-                            for (var i = 0; i < data.length; i++) {
-                                data[i].viewMode = "";
-                                data[i].editMode = "hide";
-                                data[i].id = i;
-                                addItem(data[i]);
-                            }
-                        });
                     });
                 });
-            } else {
-                kimchi.getGuestInterfaces(kimchi.selectedGuest, function(data) {
-                    for (var i = 0; i < data.length; i++) {
-                        data[i].viewMode = "";
-                        data[i].editMode = "hide";
-                        data[i].id = i;
-                        if (data[i].type == 'network')
-                            addItem(data[i]);
-                    }
-                });
-            }
-        });
+            });
+        }
+
+        if(kimchi.hostarch == kimchi.s390xArch){
+            kimchi.listNetworks390x(listNetworks390x)
+        } else {
+            kimchi.listNetworks(listNetworks)
+        }
 
         if (kimchi.hostarch === s390xArch) {
             $('#form-guest-edit-interface > div.header').hide();

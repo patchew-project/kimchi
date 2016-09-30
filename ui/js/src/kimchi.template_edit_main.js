@@ -693,7 +693,7 @@ kimchi.template_edit_main = function() {
                 origmacvtapNetworks = macvtapnet;
                 kimchi.listovsNetworks(function(ovsnet) {
                     origovsNetworks = ovsnet;
-                    kimchi.listNetworks(initInterface_s390x);
+                    kimchi.listNetworks390x(initInterface_s390x);
                 });
             });
             kimchi.listStoragePools(initStorage_s390);

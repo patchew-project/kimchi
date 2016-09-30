@@ -596,6 +596,20 @@ var kimchi = {
         });
     },
 
+    listNetworks390x : function(suc, err) {
+        wok.requestJSON({
+            url : 'plugins/kimchi/networks?connection=bridge|nat|isolated|macvtap',
+            type : 'GET',
+            contentType : 'application/json',
+            dataType : 'json',
+            resend : true,
+            success : suc,
+            error : err ? err : function(data) {
+                wok.message.error(data.responseJSON.reason);
+            }
+        });
+    },
+
     listmacvtapNetworks: function(suc, err) {
         wok.requestJSON({
             url: 'plugins/kimchi/interfaces?type=^nic|bonding|vlan$',
@@ -1311,6 +1325,7 @@ var kimchi = {
           resend: true,
           contentType: 'application/json',
           dataType: 'json',
+          async : false,
           success: suc,
           error: err
       });

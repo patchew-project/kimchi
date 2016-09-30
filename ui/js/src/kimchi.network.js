@@ -34,7 +34,7 @@ kimchi.initNetwork = function() {
 
 kimchi.initNetworkListView = function() {
     $('.wok-mask').removeClass('hidden');
-    kimchi.listNetworks(function(data) {
+    var listNetworks = function(data) {
         $('[data-toggle="tooltip"]').tooltip();
         for (var i = 0; i < data.length; i++) {
             var network = {
@@ -59,7 +59,12 @@ kimchi.initNetworkListView = function() {
         $('input', $('.grid-control', '#network-content-container')).on('keyup', function(){
             $('#networkGrid').dataGrid('filter', $(this).val());
         });
-    });
+     };
+    if(kimchi.hostarch == kimchi.s390xArch){
+        kimchi.listNetworks390x(listNetworks)
+    } else {
+        kimchi.listNetworks(listNetworks)
+    }
 };
 
 kimchi.addNetworkItem = function(network) {
