@@ -93,16 +93,10 @@ kimchi.setupNetworkFormEventForEdit = function(network) {
 
     var loadIfaces = function(interfaceFilterArray){
         var buildInterfaceOpts = function(result) {
-            var currentIfaces = network['interfaces'];
-            for (var i = 0; i < currentIfaces.length; i++) {
-                kimchi.getInterface(currentIfaces[i], function(iface) {
-                    result.push(iface);
-                } , null, true);
-            }
             kimchi.createInterfacesOpts(result, interfaceFilterArray);
 
-            for (var i = 0; i < currentIfaces.length; i++) {
-                $("#networkDestinationID option[value='" + currentIfaces[i] + "']").attr('selected','selected');
+            for (var i = 0; i < result.length; i++) {
+                $("#networkDestinationID option[value='" + result[i]["name"] + "']").attr('selected','selected');
             }
             $('#networkDestinationID').selectpicker('refresh');
         };
