@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kimchi 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-29 13:46-0300\n"
+"POT-Creation-Date: 2016-10-12 14:05+0530\n"
 "PO-Revision-Date: 2013-07-11 17:32-0400\n"
 "Last-Translator: Crístian Viana <vianac@linux.vnet.ibm.com>\n"
 "Language-Team: English\n"
@@ -472,6 +472,12 @@ msgstr ""
 msgid "Virtual machine description must be a string"
 msgstr ""
 
+msgid "console parameter is only supported for s390x/s390 architecture."
+msgstr ""
+
+msgid "invalid console type, supported types are sclp/virtio."
+msgstr ""
+
 #, python-format
 msgid ""
 "VM %(vmid)s does not contain directly assigned host device %(dev_name)s."
@@ -728,6 +734,18 @@ msgid ""
 msgstr ""
 
 msgid "Interfaces parameter only supported on s390x or s390 architecture."
+msgstr ""
+
+msgid "Storage without libvirt pool is not supported on this architecture"
+msgstr ""
+
+#, fuzzy, python-format
+msgid "Error while creating the virtual disk for the guest. Details: %(err)s"
+msgstr "Error al crear el dispositivo de almacenamiento nuevo: %(error)s"
+
+msgid ""
+"When setting template disks without libvirt, following parameters are "
+"required: 'index', 'format', 'path', 'size'"
 msgstr ""
 
 #, python-format
@@ -1297,6 +1315,18 @@ msgstr ""
 "El volumen elegido con el formato %(format)s no se ajusta al tipo de "
 "almacenamiento%(type)s"
 
+msgid "On s390x arch one of pool, path of dir_path must be specified"
+msgstr ""
+
+msgid ""
+"On s390x arch 'format' must be specified while attaching disk to virtual "
+"machine"
+msgstr ""
+
+#, python-format
+msgid "Virtual disk already exists on the system: %(disk_path)s"
+msgstr ""
+
 #, python-format
 msgid ""
 "Virtual machine '%(vm)s' must be stopped before creating a snapshot of it."
@@ -1673,6 +1703,25 @@ msgstr ""
 msgid "Edit Guest"
 msgstr "Editar invitado"
 
+msgid "General"
+msgstr "General"
+
+msgid "Storage"
+msgstr "Almacenamiento"
+
+msgid "Interface"
+msgstr "Interfaz"
+
+#, fuzzy
+msgid "Permission"
+msgstr "Versión"
+
+msgid "Pci"
+msgstr ""
+
+msgid "Snapshot"
+msgstr ""
+
 msgid "Name"
 msgstr "Nombre"
 
@@ -1693,6 +1742,15 @@ msgstr ""
 
 msgid "Icon"
 msgstr "Icono"
+
+msgid "Console"
+msgstr ""
+
+msgid "sclp"
+msgstr ""
+
+msgid "virtio"
+msgstr ""
 
 msgid "Add"
 msgstr "Añadir"
@@ -1716,6 +1774,13 @@ msgid "MAC Address"
 msgstr "Dirección MAC"
 
 msgid "IP Address"
+msgstr ""
+
+#, fuzzy
+msgid "Network/Interface"
+msgstr "Interfaz"
+
+msgid "Mode"
 msgstr ""
 
 msgid "Available system users and groups"
@@ -1904,6 +1969,12 @@ msgstr ""
 msgid "Select an existing disk"
 msgstr ""
 
+msgid "Source"
+msgstr ""
+
+msgid "Storage based on Libvirt pool or direct block device"
+msgstr ""
+
 msgid "Storage Pool"
 msgstr "Agrupación de almacenamiento"
 
@@ -1922,6 +1993,13 @@ msgstr ""
 msgid "Format of the new disk to be created"
 msgstr ""
 
+#, fuzzy
+msgid "Directory Path"
+msgstr "Vía de acceso de almacenamiento"
+
+msgid "Provide a directory path"
+msgstr ""
+
 msgid "Storage pool in which the volume is located in"
 msgstr ""
 
@@ -1930,6 +2008,13 @@ msgstr "Volumen de almacenamiento"
 
 msgid "Storage volume to be attached"
 msgstr "Volumen de almacenamiento que se va a adjuntar"
+
+#, fuzzy
+msgid "Disk Path"
+msgstr "Formato de disco"
+
+msgid "Provide a block device"
+msgstr ""
 
 msgid "File Path"
 msgstr "Vía de acceso de archivo"
@@ -1948,9 +2033,6 @@ msgstr "Invitados"
 
 msgid "Templates"
 msgstr "Plantillas"
-
-msgid "Storage"
-msgstr "Almacenamiento"
 
 msgid "This is not a valid Linux path"
 msgstr "No es una vía de acceso de Linux válida"
@@ -2182,6 +2264,31 @@ msgstr ""
 msgid "Select one or more partitions to be added to the logical pool %1:"
 msgstr ""
 
+msgid "DIR"
+msgstr ""
+
+msgid "NFS"
+msgstr ""
+
+msgid "iSCSI"
+msgstr ""
+
+msgid "LOGICAL"
+msgstr ""
+
+#, fuzzy
+msgid "device"
+msgstr "Dispositivo"
+
+msgid "path"
+msgstr ""
+
+msgid "size (GiB)"
+msgstr ""
+
+msgid "free size (GiB)"
+msgstr ""
+
 msgid "Invalid NFS mount path."
 msgstr "Vía de acceso de montaje de NFS no válida."
 
@@ -2198,6 +2305,33 @@ msgstr ""
 
 msgid "Disk pool or volume cannot be blank."
 msgstr "El volumen o la agrupación de discos no puede estar en blanco."
+
+msgid "cdrom"
+msgstr ""
+
+msgid "disk"
+msgstr ""
+
+msgid "Pool"
+msgstr ""
+
+msgid "qcow"
+msgstr ""
+
+msgid "qcow2"
+msgstr ""
+
+msgid "qed"
+msgstr ""
+
+msgid "raw"
+msgstr ""
+
+msgid "vmdk"
+msgstr ""
+
+msgid "vpc"
+msgstr ""
 
 msgid "Peers"
 msgstr ""
@@ -2402,12 +2536,6 @@ msgstr ""
 msgid "Edit Template"
 msgstr "Editar plantilla"
 
-msgid "General"
-msgstr "General"
-
-msgid "Interface"
-msgstr "Interfaz"
-
 msgid "Processor"
 msgstr "Procesador"
 
@@ -2443,3 +2571,109 @@ msgstr "Núcleos"
 
 msgid "Threads"
 msgstr "Hebras"
+
+msgid "Toggle navigation"
+msgstr ""
+
+#, fuzzy
+msgid "Add a Guest"
+msgstr "Editar invitado"
+
+msgid "State"
+msgstr ""
+
+msgid "Guest Name ID"
+msgstr ""
+
+#, fuzzy
+msgid "OS Type"
+msgstr "Tipo"
+
+msgid "VNC"
+msgstr ""
+
+#, fuzzy
+msgid "No guests found."
+msgstr "No se ha encontrado ningún ISO"
+
+#, fuzzy
+msgid "Add a Network"
+msgstr "Red"
+
+msgid "Stop"
+msgstr ""
+
+#, fuzzy
+msgid "Add a Storage"
+msgstr "Almacenamiento"
+
+#, fuzzy
+msgid "Location"
+msgstr "Acciones"
+
+msgid "%Used"
+msgstr ""
+
+msgid "Allocated"
+msgstr ""
+
+msgid "Capacity"
+msgstr ""
+
+#, fuzzy
+msgid "Disks"
+msgstr "Disco (GB)"
+
+msgid "Extending logical pool"
+msgstr ""
+
+msgid "Deactivate"
+msgstr ""
+
+msgid "Activate"
+msgstr ""
+
+msgid "Extend"
+msgstr ""
+
+msgid "Undefine"
+msgstr ""
+
+msgid "Add Volume"
+msgstr ""
+
+msgid "Resize"
+msgstr ""
+
+msgid "Wipe"
+msgstr ""
+
+msgid "Filter:"
+msgstr ""
+
+msgid "Used By"
+msgstr ""
+
+msgid "Used"
+msgstr ""
+
+#, fuzzy
+msgid "Progress"
+msgstr "En curso..."
+
+msgid "Used by the following VMs:"
+msgstr ""
+
+#, fuzzy
+msgid "Allocation"
+msgstr "Acciones"
+
+msgid "Template Name (ID)"
+msgstr ""
+
+#, fuzzy
+msgid "No templates found."
+msgstr "(No se han encontrado interfaces) "
+
+msgid "M"
+msgstr ""
