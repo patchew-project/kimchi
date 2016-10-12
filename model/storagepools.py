@@ -74,7 +74,10 @@ class StoragePoolsModel(object):
         pools = {}
 
         if is_s390x():
-            return
+            # Don't create default pool if it's not
+            # explicitly specified in template_s390x.conf
+            if 'pool' not in tmpl_defaults['disks'][0]:
+                return
 
         default_pool = tmpl_defaults['disks'][0]['pool']['name']
         default_pool = default_pool.split('/')[-1]

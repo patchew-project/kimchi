@@ -210,16 +210,25 @@ def _get_tmpl_defaults():
         data['index'] = int(disk.split('.')[1])
         # Right now 'Path' is only supported on s390x
         if storage_section[disk].get('path') and is_on_s390x:
-            data['path'] = storage_section[disk].pop('path')
-            if 'size' not in storage_section[disk]:
-                data['size'] = tmpl_defaults['storage']['disk.0']['size']
-            else:
-                data['size'] = storage_section[disk].pop('size')
+            if storage_section[disk].get('pool'):
+                # If 'pool' is explicitly specified in
+                # template_s390x.conf, drop 'path'
+                storage_section[disk].pop('path', None)
+                data['pool'] = {"name": '/plugins/kimchi/storagepools/' +
+                                        storage_section[disk].pop('pool')}
 
-            if 'format' not in storage_section[disk]:
-                data['format'] = tmpl_defaults['storage']['disk.0']['format']
             else:
-                data['format'] = storage_section[disk].pop('format')
+                data['path'] = storage_section[disk].pop('path')
+                if 'size' not in storage_section[disk]:
+                    data['size'] = tmpl_defaults['storage']['disk.0']['size']
+                else:
+                    data['size'] = storage_section[disk].pop('size')
+
+                if 'format' not in storage_section[disk]:
+                    data['format'] = tmpl_defaults['storage']['disk.0']['format']
+                else:
+                    data['format'] = storage_section[disk].pop('format')
+
         else:
             data['pool'] = {"name": '/plugins/kimchi/storagepools/' +
                                     storage_section[disk].pop('pool')}
