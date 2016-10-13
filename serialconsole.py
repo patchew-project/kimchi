@@ -101,7 +101,9 @@ class SocketServer(Process):
             while not is_listening:
                 libvirt.virEventRunDefaultImpl()
 
-        console.eventAddCallback(libvirt.VIR_STREAM_EVENT_READABLE,
+        console.eventAddCallback(libvirt.VIR_STREAM_EVENT_READABLE |
+                                 libvirt.VIR_STREAM_EVENT_WRITABLE |
+                                 libvirt.VIR_STREAM_EVENT_HANGUP,
                                  _test_output,
                                  None)
         libvirt_loop = threading.Thread(target=_event_loop)
@@ -111,6 +113,7 @@ class SocketServer(Process):
         libvirt_loop.join(1)
 
         if not libvirt_loop.is_alive():
+            wok_log.error("console libvirt stream is not listening to event")
             console.eventRemoveCallback()
             return True
 
