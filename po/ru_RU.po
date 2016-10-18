@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kimchi 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-29 13:46-0300\n"
+"POT-Creation-Date: 2016-10-18 14:47+0530\n"
 "PO-Revision-Date: 2013-07-11 17:32-0400\n"
 "Last-Translator: Crístian Viana <vianac@linux.vnet.ibm.com>\n"
 "Language-Team: English\n"
@@ -462,6 +462,26 @@ msgstr ""
 msgid "Virtual machine description must be a string"
 msgstr ""
 
+msgid "console parameter is only supported for s390x/s390 architecture."
+msgstr ""
+
+msgid "invalid console type, supported types are sclp/virtio."
+msgstr ""
+
+#, python-format
+msgid ""
+"Unable to setup password-less login at remote host %(host)s using user "
+"%(user)s: remote directory %(sshdir)s does not exist."
+msgstr ""
+
+#, python-format
+msgid ""
+"Unable to create a password-less libvirt connection to the remote libvirt "
+"daemon at host %(host)s with the user %(user)s. Please verify the remote "
+"server libvirt configuration. More information: http://libvirt.org/auth."
+"html ."
+msgstr ""
+
 #, python-format
 msgid ""
 "VM %(vmid)s does not contain directly assigned host device %(dev_name)s."
@@ -702,6 +722,18 @@ msgid ""
 msgstr ""
 
 msgid "Interfaces parameter only supported on s390x or s390 architecture."
+msgstr ""
+
+msgid "Storage without libvirt pool is not supported on this architecture"
+msgstr ""
+
+#, fuzzy, python-format
+msgid "Error while creating the virtual disk for the guest. Details: %(err)s"
+msgstr "Ошибка создания устройства хранения: %(error)s"
+
+msgid ""
+"When setting template disks without libvirt, following parameters are "
+"required: 'index', 'format', 'path', 'size'"
 msgstr ""
 
 #, python-format
@@ -1221,6 +1253,18 @@ msgid ""
 msgstr ""
 "Выбранный том с форматом %(format)s не подходит для типа памяти %(type)s"
 
+msgid "On s390x arch one of pool, path of dir_path must be specified"
+msgstr ""
+
+msgid ""
+"On s390x arch 'format' must be specified while attaching disk to virtual "
+"machine"
+msgstr ""
+
+#, python-format
+msgid "Virtual disk already exists on the system: %(disk_path)s"
+msgstr ""
+
 #, python-format
 msgid ""
 "Virtual machine '%(vm)s' must be stopped before creating a snapshot of it."
@@ -1600,6 +1644,25 @@ msgstr ""
 msgid "Edit Guest"
 msgstr "Изменить гостевую систему"
 
+msgid "General"
+msgstr "Общие"
+
+msgid "Storage"
+msgstr "Дисковая память"
+
+msgid "Interface"
+msgstr "Интерфейс"
+
+#, fuzzy
+msgid "Permission"
+msgstr "Версия"
+
+msgid "Pci"
+msgstr ""
+
+msgid "Snapshot"
+msgstr ""
+
 msgid "Name"
 msgstr "Имя"
 
@@ -1620,6 +1683,15 @@ msgstr ""
 
 msgid "Icon"
 msgstr "Значок"
+
+msgid "Console"
+msgstr ""
+
+msgid "sclp"
+msgstr ""
+
+msgid "virtio"
+msgstr ""
 
 msgid "Add"
 msgstr "Добавить"
@@ -1643,6 +1715,13 @@ msgid "MAC Address"
 msgstr "MAC-адрес"
 
 msgid "IP Address"
+msgstr ""
+
+#, fuzzy
+msgid "Network/Interface"
+msgstr "Интерфейс"
+
+msgid "Mode"
 msgstr ""
 
 msgid "Available system users and groups"
@@ -1831,6 +1910,12 @@ msgstr ""
 msgid "Select an existing disk"
 msgstr ""
 
+msgid "Source"
+msgstr ""
+
+msgid "Storage based on Libvirt pool or direct block device"
+msgstr ""
+
 msgid "Storage Pool"
 msgstr "Пул памяти"
 
@@ -1849,6 +1934,13 @@ msgstr ""
 msgid "Format of the new disk to be created"
 msgstr ""
 
+#, fuzzy
+msgid "Directory Path"
+msgstr "Путь к диску"
+
+msgid "Provide a directory path"
+msgstr ""
+
 msgid "Storage pool in which the volume is located in"
 msgstr ""
 
@@ -1857,6 +1949,13 @@ msgstr "Том памяти"
 
 msgid "Storage volume to be attached"
 msgstr "Том подключен"
+
+#, fuzzy
+msgid "Disk Path"
+msgstr "Формат диска"
+
+msgid "Provide a block device"
+msgstr ""
 
 msgid "File Path"
 msgstr "Путь к файлу"
@@ -1875,9 +1974,6 @@ msgstr "Гостевые системы"
 
 msgid "Templates"
 msgstr "Шаблоны"
-
-msgid "Storage"
-msgstr "Дисковая память"
 
 msgid "This is not a valid Linux path"
 msgstr "Этот недопустимый путь в Linux"
@@ -1929,6 +2025,9 @@ msgid "Not Available"
 msgstr ""
 
 msgid "Please check the invalid Storage Pools"
+msgstr ""
+
+msgid "Please check the invalid Storage Pools or Paths"
 msgstr ""
 
 msgid ""
@@ -2106,6 +2205,31 @@ msgstr ""
 msgid "Select one or more partitions to be added to the logical pool %1:"
 msgstr ""
 
+msgid "DIR"
+msgstr ""
+
+msgid "NFS"
+msgstr ""
+
+msgid "iSCSI"
+msgstr ""
+
+msgid "LOGICAL"
+msgstr ""
+
+#, fuzzy
+msgid "device"
+msgstr "Устройство"
+
+msgid "path"
+msgstr ""
+
+msgid "size (GiB)"
+msgstr ""
+
+msgid "free size (GiB)"
+msgstr ""
+
 msgid "Invalid NFS mount path."
 msgstr "Недопустимый путь монтирования NFS."
 
@@ -2122,6 +2246,48 @@ msgstr ""
 
 msgid "Disk pool or volume cannot be blank."
 msgstr "Не указан пул или том диска."
+
+msgid ""
+"Disk size or Format or Directory path cannot be blank and Directory path "
+"needs to be a valid local/remote path."
+msgstr ""
+
+#, fuzzy
+msgid "Disk path needs to be a valid local/remote path and cannot be blank."
+msgstr ""
+"Путь к CDROM должен быть правильным локальным или удаленным путем и не может "
+"быть пустым."
+
+#, fuzzy
+msgid "Storage pool or Disk size or Format cannot be blank."
+msgstr "Не указан пул или том диска."
+
+msgid "cdrom"
+msgstr ""
+
+msgid "disk"
+msgstr ""
+
+msgid "Pool"
+msgstr ""
+
+msgid "qcow"
+msgstr ""
+
+msgid "qcow2"
+msgstr ""
+
+msgid "qed"
+msgstr ""
+
+msgid "raw"
+msgstr ""
+
+msgid "vmdk"
+msgstr ""
+
+msgid "vpc"
+msgstr ""
 
 msgid "Peers"
 msgstr ""
@@ -2322,12 +2488,6 @@ msgstr ""
 msgid "Edit Template"
 msgstr "Изменить шаблон"
 
-msgid "General"
-msgstr "Общие"
-
-msgid "Interface"
-msgstr "Интерфейс"
-
 msgid "Processor"
 msgstr "Процессор"
 
@@ -2363,3 +2523,109 @@ msgstr "Ядра"
 
 msgid "Threads"
 msgstr "Нити"
+
+msgid "Toggle navigation"
+msgstr ""
+
+#, fuzzy
+msgid "Add a Guest"
+msgstr "Изменить гостевую систему"
+
+msgid "State"
+msgstr ""
+
+msgid "Guest Name ID"
+msgstr ""
+
+#, fuzzy
+msgid "OS Type"
+msgstr "Тип"
+
+msgid "VNC"
+msgstr ""
+
+#, fuzzy
+msgid "No guests found."
+msgstr "Не найден образ ISO"
+
+#, fuzzy
+msgid "Add a Network"
+msgstr "Сеть"
+
+msgid "Stop"
+msgstr ""
+
+#, fuzzy
+msgid "Add a Storage"
+msgstr "Дисковая память"
+
+#, fuzzy
+msgid "Location"
+msgstr "Действия"
+
+msgid "%Used"
+msgstr ""
+
+msgid "Allocated"
+msgstr ""
+
+msgid "Capacity"
+msgstr ""
+
+#, fuzzy
+msgid "Disks"
+msgstr "Диск (ГБ)"
+
+msgid "Extending logical pool"
+msgstr ""
+
+msgid "Deactivate"
+msgstr ""
+
+msgid "Activate"
+msgstr ""
+
+msgid "Extend"
+msgstr ""
+
+msgid "Undefine"
+msgstr ""
+
+msgid "Add Volume"
+msgstr ""
+
+msgid "Resize"
+msgstr ""
+
+msgid "Wipe"
+msgstr ""
+
+msgid "Filter:"
+msgstr ""
+
+msgid "Used By"
+msgstr ""
+
+msgid "Used"
+msgstr ""
+
+#, fuzzy
+msgid "Progress"
+msgstr "Выполнение..."
+
+msgid "Used by the following VMs:"
+msgstr ""
+
+#, fuzzy
+msgid "Allocation"
+msgstr "Действия"
+
+msgid "Template Name (ID)"
+msgstr ""
+
+#, fuzzy
+msgid "No templates found."
+msgstr "(Интерфейсы не найдены)"
+
+msgid "M"
+msgstr ""
