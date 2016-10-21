@@ -27,8 +27,8 @@ from configobj import ConfigObj
 from distutils.version import LooseVersion
 
 from wok.config import PluginPaths
+from wok.exception import InvalidParameter
 from wok.plugins.kimchi.config import kimchiPaths
-
 
 SUPPORTED_ARCHS = {'x86': ('i386', 'i686', 'x86_64'),
                    'power': ('ppc', 'ppc64'),
@@ -129,7 +129,8 @@ def _get_default_template_mem():
 def _get_tmpl_defaults():
     """
     ConfigObj returns a dict like below when no changes were made in the
-    template configuration file (template.conf)
+    template configuration file (template.conf and in case of s390x its
+    template_s390x.conf)
 
     {'main': {}, 'memory': {}, 'storage': {'disk.0': {}}, 'processor': {},
      'graphics': {}}
@@ -183,6 +184,37 @@ def _get_tmpl_defaults():
     else:
         config_file = os.path.join(kimchiPaths.sysconf_dir, 'template.conf')
     config = ConfigObj(config_file)
+
+    # File configuration takes preference.
+    # In s390x, file configuration can have storage pool or path.
+    # Default configuration for s390x is storage path.
+    # In case file conf has storage pool then storage pool takes preference.
+    # When conf file has explicitly storage pool: "defaults" should
+    # have storage pool and default configured path should be removed,
+    # as either storage can be path or pool, cannot be both.
+    # When conf file does not explicity storage pool or have explicitly
+    # storage path: "default" should have storage path only and cannot
+    # have default pool.
+    #
+    # Check file conf has storage configured.
+    if is_on_s390x and config.get('storage').get('disk.0'):
+        # remove storage from default_config as file configuration takes
+        # preference.
+        default_config.pop('storage')
+
+        # Get storage configuration present in conf file
+        config_pool = config.get('storage').get('disk.0').get('pool')
+        config_path = config.get('storage').get('disk.0').get('path')
+
+        # If storage configured in conf file then it should have either
+        # pool or path.
+        if not config_pool and not config_path:
+            raise InvalidParameter('KCHTMPL0040E')
+
+        # On s390x if config file has both path and pool uncommented
+        # then path should take preference.
+        if config_pool and config_path:
+            config.get('storage').get('disk.0').pop('pool')
 
     # Merge default configuration with file configuration
     default_config.merge(config)

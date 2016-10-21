@@ -35,6 +35,7 @@ from wok.plugins.kimchi import network as knetwork
 from wok.plugins.kimchi.config import kimchiPaths
 from wok.plugins.kimchi.model.config import CapabilitiesModel
 from wok.plugins.kimchi.osinfo import defaults as tmpl_defaults
+from wok.plugins.kimchi.utils import is_s390x
 from wok.plugins.kimchi.xmlutils.interface import get_iface_xml
 from wok.plugins.kimchi.xmlutils.network import create_linux_bridge_xml
 from wok.plugins.kimchi.xmlutils.network import create_vlan_tagged_bridge_xml
@@ -64,6 +65,12 @@ class NetworksModel(object):
                          "active. Please, check the configuration in "
                          "%s/template.conf to ensure it lists only valid "
                          "networks." % (net_name, kimchiPaths.sysconf_dir))
+            if is_s390x():
+                error_msg = ("Network %s does not exist or is not "
+                             "active. Please, check the "
+                             "configuration in %s/template_s390x.conf "
+                             "to ensure it lists only valid "
+                             "networks." % (net_name, kimchiPaths.sysconf_dir))
 
             try:
                 net = conn.networkLookupByName(net_name)
