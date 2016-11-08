@@ -82,7 +82,8 @@ DOM_STATE_MAP = {0: 'nostate',
                  7: 'pmsuspended'}
 
 # update parameters which are updatable when the VM is online
-VM_ONLINE_UPDATE_PARAMS = ['graphics', 'groups', 'memory', 'users']
+VM_ONLINE_UPDATE_PARAMS = ['cpu_info', 'graphics', 'groups',
+                           'memory', 'users']
 
 # update parameters which are updatable when the VM is offline
 VM_OFFLINE_UPDATE_PARAMS = ['cpu_info', 'graphics', 'groups', 'memory',
@@ -1028,6 +1029,15 @@ class VMModel(object):
                                                unit='Kib'))
         return ET.tostring(root, encoding="utf-8")
 
+    def get_vm_cpu_cores(self, vm_xml):
+        return xpath_get_text(vm_xml, XPATH_TOPOLOGY + '/@cores')[0]
+
+    def get_vm_cpu_sockets(self, vm_xml):
+        return xpath_get_text(vm_xml, XPATH_TOPOLOGY + '/@sockets')[0]
+
+    def get_vm_cpu_threads(self, vm_xml):
+        return xpath_get_text(vm_xml, XPATH_TOPOLOGY + '/@threads')[0]
+
     def _update_cpu_info(self, new_xml, dom, new_info):
         topology = {}
         if self.has_topology(dom):
@@ -1063,6 +1073,44 @@ class VMModel(object):
         # Memory Hotplug/Unplug
         if (('memory' in params) and ('current' in params['memory'])):
             self._update_memory_live(dom, params)
+
+        if 'vcpus' in params.get('cpu_info', {}):
+            self.cpu_hotplug_precheck(dom, params)
+            vcpus = params['cpu_info'].get('vcpus')
+            self.update_cpu_live(dom, vcpus)
+
+    def cpu_hotplug_precheck(self, dom, params):
+
+        if (('maxvcpus' in params['cpu_info']) or
+                ('topology' in params['cpu_info'])):
+            raise InvalidParameter('KCHCPUHOTP0001E')
+
+        vcpus = params['cpu_info'].get('vcpus')
+        if vcpus > dom.maxVcpus():
+            raise InvalidParameter(
+                'KCHCPUHOTP0002E',
+                {'vm': dom.name(), 'cpus': dom.maxVcpus()}
+            )
+
+        if self.has_topology(dom):
+            sockets = int(self.get_vm_cpu_sockets(dom.XMLDesc(0)))
+            cores = int(self.get_vm_cpu_cores(dom.XMLDesc(0)))
+            threads = int(self.get_vm_cpu_threads(dom.XMLDesc(0)))
+
+            if vcpus % threads != 0:
+                raise InvalidParameter(
+                    'KCHCPUHOTP0003E',
+                    {'sockets': str(sockets), 'cores': str(cores),
+                     'threads': str(threads)}
+                )
+
+    def update_cpu_live(self, dom, vcpus):
+        flags = libvirt.VIR_DOMAIN_AFFECT_LIVE | \
+                libvirt.VIR_DOMAIN_AFFECT_CONFIG
+        try:
+            dom.setVcpusFlags(vcpus, flags)
+        except libvirt.libvirtError as e:
+            raise OperationFailed('KCHCPUHOTP0004E', {'err': e.message})
 
     def _get_mem_dev_total_size(self, xml):
         root = ET.fromstring(xml)
