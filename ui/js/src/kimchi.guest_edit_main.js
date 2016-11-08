@@ -981,15 +981,13 @@ kimchi.guest_edit_main = function() {
             wok.window.open('plugins/kimchi/guest-storage-add.html', 'extendCreateStorage');
         });
         if ((kimchi.thisVMState === "running") || (kimchi.thisVMState === "paused")) {
+            $("#form-guest-edit-general input").not("#guest-edit-cores-textbox").prop("disabled", true);
+            $("#guest-edit-cores-hotplug-unsupported").removeClass('hidden');
             if (kimchi.capabilities.mem_hotplug_support) {
-                $("#form-guest-edit-general input").not("#guest-edit-memory-textbox").prop("disabled", true);
+                $("#guest-edit-memory-textbox").prop("disabled", false);
             } else {
-                $("#form-guest-edit-general input").prop("disabled", true);
+                $("#guest-edit-memory-hotplug-unsupported").removeClass('hidden');
             }
-        }
-        if (! kimchi.capabilities.mem_hotplug_support) {
-            $("#guest-edit-max-memory-textbox").prop("disabled", true);
-            $("#guest-edit-memory-hotplug-unsupported").removeClass('hidden');
         }
 
         $('#guest-show-max-memory').on('click', function(e) {
@@ -1071,7 +1069,7 @@ kimchi.guest_edit_main = function() {
                     // since it is disabled; for cpu_info, when guest is running, just skip it since no processing is required
                     if (kimchi.thisVMState === 'running' || kimchi.thisVMState === 'paused') {
                         if (key === 'cpu_info') {
-                            continue;
+                            data['cpu_info']['maxvcpus'] = org.cpu_info.maxvcpus;
                         }
                         if (key === 'memory') {
                             // Replace valueFromUI of max mem with one from original as otherwise the value is undefined
