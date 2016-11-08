@@ -558,8 +558,9 @@ kimchi.template_edit_main = function() {
                         for (var i = 0; i < origmacvtapNetworks.length; i++) {
                             if (networkName === origmacvtapNetworks[i].name) {
                                 networkOptions += '<option selected="selected">' + origmacvtapNetworks[i].name + '</option>';
+                            }else{
+                                networkOptions += '<option>' + origmacvtapNetworks[i].name + '</option>';
                             }
-                            networkOptions += '<option>' + origmacvtapNetworks[i].name + '</option>';
                         }
                         $('select', '#form-template-interface-s390x #networkID' + networkItemNum + ' span.network').append(networkOptions);
 
@@ -576,8 +577,9 @@ kimchi.template_edit_main = function() {
                         for (var i = 0; i < origovsNetworks.length; i++) {
                             if (networkName === origovsNetworks[i]) {
                                 networkOptions += '<option selected="selected">' + origovsNetworks[i] + '</option>';
+                            }else{
+                                networkOptions += '<option>' + origovsNetworks[i] + '</option>';
                             }
-                            networkOptions += '<option>' + origovsNetworks[i] + '</option>';
                         }
                         $('select', '#form-template-interface-s390x #networkID' + networkItemNum + ' span.network').append(networkOptions);
 
@@ -591,8 +593,7 @@ kimchi.template_edit_main = function() {
                         for (var i = 0; i < result.length; i++) {
                             if (networkName === result[i].name) {
                                 networkOptions += '<option selected="selected">' + result[i].name + '</option>';
-                            }
-                            if (result[i].state === "active" && networkName !== result[i].name) {
+                            }else if (result[i].state === "active" && networkName !== result[i].name) {
                                 networkOptions += '<option>' + result[i].name + '</option>';
                             }
                         }
