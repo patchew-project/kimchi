@@ -1747,58 +1747,59 @@ class VMModel(object):
             if password is None:
                 raise OperationFailed("KCHVM0056E",
                                       {'host': remote_host, 'user': user})
-            else:
-                self._set_password_less_login(remote_host, user, password)
+            return False
+        return True
+
+    def _read_id_rsa_pub_file(self, id_rsa_pub_file):
+        data = None
+        with open(id_rsa_pub_file, "r") as id_file:
+            data = id_file.read()
+        return data
+
+    def _create_root_ssh_key_if_required(self, user, id_rsa_pub_file,
+                                         id_rsa_file):
+        if os.path.isfile(id_rsa_pub_file):
+            return
+
+        with open("/dev/zero") as zero_input:
+            cmd = ['ssh-keygen', '-q', '-N', '', '-f', id_rsa_file]
+            proc = subprocess.Popen(
+                cmd,
+                stdin=zero_input,
+                stdout=open(os.devnull, 'wb')
+            )
+            out, err = proc.communicate()
+
+            if not os.path.isfile(id_rsa_pub_file):
+                raise OperationFailed("KCHVM0070E")
+
+            if user != 'root':
+                id_rsa_content = self._read_id_rsa_pub_file(id_rsa_pub_file)
+                updated_content = id_rsa_content.replace(
+                    ' root@', ' %s@' % user
+                )
+                with open(id_rsa_pub_file, 'w+') as f:
+                    f.write(updated_content)
+
+                user_uid = pwd.getpwnam(user).pw_uid
+                user_gid = pwd.getpwnam(user).pw_gid
+                os.chown(id_rsa_pub_file, user_uid, user_gid)
+                os.chown(id_rsa_file, user_uid, user_gid)
+
+    def _get_ssh_client(self, remote_host, user, passwd, ssh_port):
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh_client.connect(remote_host, ssh_port, username=user,
+                           password=passwd, timeout=4)
+        return ssh_client
 
     def _set_password_less_login(self, remote_host, user, passwd):
-        home_dir = '/root' if user is 'root' else '/home/%s' % user
+        home_dir = '/root' if user == 'root' else '/home/%s' % user
 
         id_rsa_file = "%s/.ssh/id_rsa" % home_dir
         id_rsa_pub_file = id_rsa_file + '.pub'
         ssh_port = 22
         ssh_client = None
-
-        def read_id_rsa_pub_file():
-            data = None
-            with open(id_rsa_pub_file, "r") as id_file:
-                data = id_file.read()
-            return data
-
-        def create_root_ssh_key_if_required():
-            if os.path.isfile(id_rsa_pub_file):
-                return
-
-            with open("/dev/zero") as zero_input:
-                cmd = ['ssh-keygen', '-q', '-N', '', '-f', id_rsa_file]
-                proc = subprocess.Popen(
-                    cmd,
-                    stdin=zero_input,
-                    stdout=open(os.devnull, 'wb')
-                )
-                out, err = proc.communicate()
-
-                if not os.path.isfile(id_rsa_pub_file):
-                    raise OperationFailed("KCHVM0070E")
-
-                if user is not 'root':
-                    id_rsa_content = read_id_rsa_pub_file()
-                    updated_content = id_rsa_content.replace(
-                        ' root@', ' %s@' % user
-                    )
-                    with open(id_rsa_pub_file, 'w+') as f:
-                        f.write(updated_content)
-
-                    user_uid = pwd.getpwnam(user).pw_uid
-                    user_gid = pwd.getpwnam(user).pw_gid
-                    os.chown(id_rsa_pub_file, user_uid, user_gid)
-                    os.chown(id_rsa_file, user_uid, user_gid)
-
-        def get_ssh_client(remote_host, user, passwd):
-            ssh_client = paramiko.SSHClient()
-            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh_client.connect(remote_host, ssh_port, username=user,
-                               password=passwd, timeout=4)
-            return ssh_client
 
         def append_id_rsa_to_remote_authorized_keys(ssh_client, id_rsa_data):
             sftp_client = ssh_client.open_sftp()
@@ -1824,9 +1825,11 @@ class VMModel(object):
             sftp_client.close()
 
         try:
-            create_root_ssh_key_if_required()
-            id_rsa_data = read_id_rsa_pub_file()
-            ssh_client = get_ssh_client(remote_host, user, passwd)
+            self._create_root_ssh_key_if_required(user, id_rsa_pub_file,
+                                                  id_rsa_file)
+            id_rsa_data = self._read_id_rsa_pub_file(id_rsa_pub_file)
+            ssh_client = self._get_ssh_client(remote_host, user, passwd,
+                                              ssh_port)
             append_id_rsa_to_remote_authorized_keys(
                 ssh_client,
                 id_rsa_data
@@ -1865,16 +1868,20 @@ class VMModel(object):
 
     def migration_pre_check(self, remote_host, user, password):
         self._check_if_host_not_localhost(remote_host)
-        self._check_if_password_less_login_enabled(
+        default_passless_status = self._check_if_password_less_login_enabled(
             remote_host,
             user,
             password
         )
-        self._check_remote_libvirt_conn(remote_host, user)
+        if not default_passless_status:
+            self._set_password_less_login(remote_host, user, password)
+
         self._check_if_migrating_same_arch_hypervisor(remote_host, user)
 
         if platform.machine() in ['ppc64', 'ppc64le']:
             self._check_ppc64_subcores_per_core(remote_host, user)
+
+        return default_passless_status
 
     def _check_if_path_exists_in_remote_host(self, path, remote_host, user):
         username_host = "%s@%s" % (user, remote_host)
@@ -1957,15 +1964,22 @@ class VMModel(object):
                         user
                     )
 
-    def migrate(self, name, remote_host, user=None, password=None):
+    def migrate(self, name, remote_host, user=None, password=None,
+                remove_passless_login=True):
         name = name.decode('utf-8')
         remote_host = remote_host.decode('utf-8')
 
         if user is None:
             user = 'root'
+        user = user.encode('utf-8')
 
-        self.migration_pre_check(remote_host, user, password)
-        dest_conn = self._get_remote_libvirt_conn(remote_host, user)
+        default_passless_status = self.migration_pre_check(remote_host, user,
+                                                           password)
+
+        if default_passless_status:
+            remove_passless_login = False
+
+        dest_conn = self._get_remote_libvirt_conn(remote_host)
 
         non_shared = self._check_if_nonshared_migration(
             name,
@@ -1977,11 +1991,71 @@ class VMModel(object):
                   'dest_conn': dest_conn,
                   'non_shared': non_shared,
                   'remote_host': remote_host,
-                  'user': user}
+                  'user': user,
+                  'password': password,
+                  'remove_passless_login': remove_passless_login}
         task_id = AsyncTask('/plugins/kimchi/vms/%s/migrate' % name,
                             self._migrate_task, params).id
 
         return self.task.lookup(task_id)
+
+    def _remove_password_less_login(self, remote_host, user, passwd):
+        home_dir = '/root' if user == 'root' else '/home/%s' % user
+
+        id_rsa_file = "%s/.ssh/id_rsa" % home_dir
+        id_rsa_pub_file = id_rsa_file + '.pub'
+        ssh_port = 22
+        ssh_client = None
+
+        def remove_id_rsa_to_remote_authorized_keys(ssh_client, id_rsa_data):
+            sftp_client = ssh_client.open_sftp()
+            ssh_dir = '%s/.ssh' % home_dir
+
+            try:
+                sftp_client.chdir(ssh_dir)
+            except IOError:
+                raise OperationFailed(
+                    "KCHVM0089E",
+                    {'host': remote_host, 'user': user, 'sshdir': ssh_dir}
+                )
+            file_handler = sftp_client.file(
+                '%s/.ssh/authorized_keys' % home_dir,
+                mode='r',
+                bufsize=1
+            )
+            lines = file_handler.readlines()
+            try:
+                lines.remove(id_rsa_data)
+            except ValueError:
+                pass
+            file_handler = sftp_client.file(
+                 '%s/.ssh/authorized_keys' % home_dir,
+                 mode='w',
+                 bufsize=1
+            )
+            file_handler.writelines(lines)
+            file_handler.flush()
+            file_handler.close()
+            sftp_client.close()
+
+        try:
+            self._create_root_ssh_key_if_required(user, id_rsa_pub_file,
+                                                  id_rsa_file)
+            id_rsa_data = self._read_id_rsa_pub_file(id_rsa_pub_file)
+            ssh_client = self._get_ssh_client(remote_host, user, passwd,
+                                              ssh_port)
+            remove_id_rsa_to_remote_authorized_keys(
+                ssh_client,
+                id_rsa_data
+            )
+        except Exception, e:
+            raise OperationFailed(
+                "KCHVM0068E",
+                {'host': remote_host, 'user': user, 'error': e}
+            )
+        finally:
+            if ssh_client:
+                ssh_client.close()
 
     def _migrate_task(self, cb, params):
         name = params['name'].decode('utf-8')
@@ -1989,6 +2063,8 @@ class VMModel(object):
         non_shared = params['non_shared']
         remote_host = params['remote_host']
         user = params['user']
+        password = params['password']
+        remove_passless_login = params['remove_passless_login']
 
         cb('starting a migration')
 
@@ -2022,6 +2098,8 @@ class VMModel(object):
             raise OperationFailed('KCHVM0058E', {'err': e.message,
                                                  'name': name})
         finally:
+            if remove_passless_login:
+                self._remove_password_less_login(remote_host, user, password)
             dest_conn.close()
 
         cb('Migrate finished', True)
