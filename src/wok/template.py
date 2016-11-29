@@ -22,10 +22,13 @@
 import cherrypy
 import errno
 import json
+import threading
 import time
+import locale
+
 from Cheetah.Template import Template
 from glob import iglob
-
+from contextlib import contextmanager
 
 from wok import config as config
 from wok.config import paths
@@ -133,3 +136,24 @@ def render(resource, data):
         return render_cheetah_file(resource, data)
     else:
         raise cherrypy.HTTPError(406)
+
+
+def get_locale():
+    cookie = cherrypy.request.cookie
+    if "wokLocale" in cookie.keys():
+        return [cookie["wokLocale"].value]
+    langs = get_lang()
+    return langs
+
+
+LOCALE_LOCK = threading.Lock()
+
+
+@contextmanager
+def setlocale(name):
+    with LOCALE_LOCK:
+        saved = locale.setlocale(locale.LC_TIME)
+        try:
+            yield locale.setlocale(locale.LC_TIME, name)
+        finally:
+            locale.setlocale(locale.LC_TIME, saved)

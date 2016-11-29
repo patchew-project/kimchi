@@ -42,6 +42,7 @@ from threading import Timer
 from wok.config import paths, PluginPaths
 from wok.exception import InvalidParameter, TimeoutExpired
 from wok.stringutils import decode_value
+from wok.template import get_locale, setlocale
 
 
 wok_log = cherrypy.log.error_log
@@ -619,3 +620,12 @@ def upgrade_objectstore_schema(objstore=None, field=None):
         wok_log.error("Cannot upgrade objectstore schema: %s" % e.args[0])
         return False
     return True
+
+
+def dateNtime_to_locale(dateNtime):
+    dt = datetime.strptime(dateNtime, "%Y-%m-%d %H:%M:%S")
+    cokies_locale = get_locale()
+    cokies_locale = cokies_locale[0].replace("-", "_")
+    with setlocale(cokies_locale):
+        dt_locale = (dt.strftime('%c'))
+    return dt_locale
