@@ -35,6 +35,7 @@
   border-bottom: 1px solid #eee;
   overflow: visible;
   clear: both;
+  margin: 12px 10px 12px 0px !important;
 }
 
 #wok-root-container .accordion:first-chld {

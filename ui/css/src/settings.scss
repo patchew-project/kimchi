@@ -30,6 +30,7 @@
 #wok-root-container{
     .accordion {
         @include wok-accordion();
+        margin: 12px 10px 12px 0px !important;
     }
 }
 

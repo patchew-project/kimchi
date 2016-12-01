@@ -74,6 +74,27 @@ wok.createBootgrid = function(opts) {
       "settings-user-log-message": function(column, row) {
         return '<span class="trim" data-toggle="tooltip"  data-placement="auto bottom" title="'+row.message+'">' +row.message+ '</span> ';
       },
+      "settings-user-log-user": function(column, row) {
+        return '<span class="trim" data-toggle="tooltip"  data-placement="auto bottom" title="'+row.user+'">' +row.user+ '</span> ';
+      },
+      "settings-user-log-ip": function(column, row) {
+        return '<span class="trim" data-toggle="tooltip"  data-placement="auto bottom" title="'+row.ip+'">' +row.ip+ '</span> ';
+      },
+      "settings-user-log-req": function(column, row) {
+        return '<span class="trim" data-toggle="tooltip"  data-placement="auto bottom" title="'+row.req+'">' +row.req+ '</span> ';
+      },
+      "settings-user-log-date": function(column, row) {
+        return '<span class="trim" data-toggle="tooltip"  data-placement="auto bottom" title="'+row.date+'">' +row.date+ '</span> ';
+      },
+      "settings-user-log-time": function(column, row) {
+        return '<span class="trim" data-toggle="tooltip"  data-placement="auto bottom" title="'+row.time+'">' +row.time+ '</span> ';
+      },
+      "settings-user-log-zone": function(column, row) {
+        return '<span class="trim" data-toggle="tooltip"  data-placement="auto bottom" title="'+row.zone+'">' +row.zone+ '</span> ';
+      },
+      "settings-user-log-message": function(column, row) {
+        return '<span class="trim" data-toggle="tooltip"  data-placement="auto bottom" title="'+row.message+'">' +row.message+ '</span> ';
+      },
     },
     converters: converters,
     css: {

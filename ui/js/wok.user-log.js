@@ -77,45 +77,57 @@ wok.listUserLogConfig = function() {
       "column-id": 'app',
       "converter": 'string',
       "formatter": "settings-user-log-app",
+      "width": "166px",
       "title": i18n['WOKSETT0001M']
     }, {
       "column-id": 'user',
       "converter": 'string',
+      "width": "118px",
+      "formatter": "settings-user-log-user",
       "title": i18n['WOKSETT0002M']
     }, {
       "column-id": 'ip',
       "converter": 'string',
+      "formatter": "settings-user-log-ip",
+      "width": "164px",
       "title": i18n['WOKSETT0014M']
     }, {
       "column-id": 'req',
       "converter": 'string',
+      "width": "145px",
+      "formatter": "settings-user-log-req",
       "title": i18n['WOKSETT0003M']
     }, {
       "column-id": 'date',
       "converter": 'date-locale-converter',
       "order": 'desc',
+      "width": "118px",
+      "formatter": "settings-user-log-date",
       "title": i18n['WOKSETT0004M']
     }, {
       "column-id": 'time',
       "converter": 'time-locale-converter',
       "order": 'desc',
+      "formatter": "settings-user-log-time",
+      "width": "119px",
       "title": i18n['WOKSETT0005M']
     }, {
       "column-id": 'zone',
       "converter": 'string',
-      "width": "6%",
+      "formatter": "settings-user-log-zone",
+      "width": "155px",
       "title": i18n['WOKSETT0013M']
     }, {
       "column-id": 'status',
       "converter": 'string',
-      "width": "7%",
+      "width": "130px",
       "title": i18n['WOKSETT0015M']
     }, {
       "column-id": 'message',
       "converter": 'string',
       "formatter": "settings-user-log-message",
       "sortable": false,
-      "width": "30%",
+      "width": "150px",
       "title": i18n['WOKSETT0006M']
     }
   ];
