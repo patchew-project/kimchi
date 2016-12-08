@@ -86,7 +86,10 @@ class WokMessage(object):
 
     def get_text(self, prepend_code=True, translate=True):
         msg = self._get_text(translate)
-        msg = decode_value(msg) % self.args
+        try:
+            msg = decode_value(msg) % self.args
+        except KeyError:
+            msg = decode_value(msg)
 
         if prepend_code:
             return "%s: %s" % (self.code, msg)
