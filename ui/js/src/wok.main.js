@@ -209,9 +209,30 @@ wok.main = function() {
          * and clear location.hash to jump to home page.
          */
         var tab = $('#tabPanel a[href="' + url + '"]');
-        if (tab.length === 0 && url != 'wok-empty.html') {
-            location.hash = '#';
-            return;
+        if (tab.length === 0) {
+            if  (url === "tabs/settings.html") {
+                /*
+                 * This scenario means that the WoK tab isn't avaiable for the
+                 * current user (probably because it's a regular non-sudo user).
+                 * If there are other tabs to fall back to, redirect to them. Otherwise,
+                 * if running WoK without plug-ins, put an informative message.
+                 */
+                if ($('#tabPanel a').length === 0) {
+                    var warning_msg = "Unable to access WoK User Activity Log feature as a non-root user.<br>No plugins installed currently. You can download the available plugins <a href='https://github.com/kimchi-project/kimchi'>Kimchi</a> and <a href='https://github.com/kimchi-project/ginger'>Ginger</a> from Github."
+                    $('#main').html(warning_msg).addClass('noPluginMessage');
+                } else {
+                    location.hash = '#' + $('#tabPanel a').attr('href');
+                    var lastIndex = location.hash.lastIndexOf(".html");
+                    if (lastIndex != -1) {
+                        location.hash = location.hash.substring(0, lastIndex);
+                    }
+                }
+                return;
+            }
+            if (url != 'wok-empty.html') {
+                location.hash = '#';
+                return;
+            }
         }
         //Remove the tab arrow indicator for no plugin
         if (url == 'wok-empty.html') {
