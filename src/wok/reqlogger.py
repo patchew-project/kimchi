@@ -99,7 +99,8 @@ def log_request(code, params, exception, method, status, app=None, user=None,
         app = cherrypy.request.app.script_name
 
     if user is None:
-        user = cherrypy.session.get(USER_NAME, 'N/A')
+        cherrypy_user = cherrypy.session.get(USER_NAME, 'N/A')
+        user = cherrypy_user if cherrypy_user is not None else "N/A"
 
     if ip is None:
         ip = cherrypy.request.remote.ip
