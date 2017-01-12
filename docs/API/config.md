@@ -17,7 +17,7 @@ Contains information about the application environment and configuration.
 
 **Actions (POST):**
 
-*No actions defined*
+* restart: restarts the server. This process will drop all existing WoK connections, restart WoK and reload all WoK plug-ins.
 
 #### Examples
 GET /config
