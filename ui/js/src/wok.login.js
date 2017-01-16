@@ -1,7 +1,7 @@
 /*
  * Project Wok
  *
- * Copyright IBM Corp, 2015-2016
+ * Copyright IBM Corp, 2015-2017
  *
  * Code derived from Project Kimchi
  *
@@ -71,6 +71,7 @@ wok.login_main = function() {
         wok.login(settings, function(data) {
             var query = window.location.search;
             var next  = /.*next=(.*?)(&|$)/g.exec(query);
+
             if (next) {
                 var next_url = decodeURIComponent(next[1]);
             }
@@ -84,9 +85,17 @@ wok.login_main = function() {
             if (jqXHR.responseText == "") {
                 $("#messUserPass").hide();
                 $("#missServer").show();
+                $("#timeoutError").hide();
+            } else if ((jqXHR.responseJSON != undefined) &&
+                       ! (jqXHR.responseJSON["reason"] == undefined)) {
+                $("#messUserPass").hide();
+                $("#missServer").hide();
+                $("#timeoutError").html(jqXHR.responseJSON["reason"]);
+                $("#timeoutError").show();
             } else {
                 $("#missServer").hide();
                 $("#messUserPass").show();
+                $("#timeoutError").hide();
             }
             $("#messSession").hide();
             $("#logging").hide();

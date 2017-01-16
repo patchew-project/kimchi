@@ -1,7 +1,7 @@
 #
 # Project Wok
 #
-# Copyright IBM Corp, 2015-2016
+# Copyright IBM Corp, 2015-2017
 #
 # Code derived from Project Kimchi
 #
@@ -22,6 +22,7 @@
 import cherrypy
 import json
 import os
+import time
 from distutils.version import LooseVersion
 
 from wok import auth
@@ -31,7 +32,7 @@ from wok.config import paths as wok_paths
 from wok.control import sub_nodes
 from wok.control.base import Resource
 from wok.control.utils import parse_request
-from wok.exception import MissingParameter
+from wok.exception import MissingParameter, UnauthorizedError
 from wok.reqlogger import log_request
 
 
@@ -48,7 +49,8 @@ class Root(Resource):
         super(Root, self).__init__(model)
         self._handled_error = ['error_page.400', 'error_page.404',
                                'error_page.405', 'error_page.406',
-                               'error_page.415', 'error_page.500']
+                               'error_page.415', 'error_page.500',
+                               'error_page.403']
 
         if not dev_env:
             self._cp_config = dict([(key, self.error_production_handler)
@@ -146,6 +148,8 @@ class WokRoot(Root):
         self.domain = 'wok'
         self.messages = messages
         self.extends = None
+        self.failed_logins = []
+        self.fail_timeout = 30
 
         # set user log messages and make sure all parameters are present
         self.log_map = ROOT_REQUESTS
@@ -153,6 +157,12 @@ class WokRoot(Root):
 
     @cherrypy.expose
     def login(self, *args):
+        def _raise_timeout():
+            details = e = UnauthorizedError("WOKAUTH0004E",
+                                            {"seconds": self.fail_timeout})
+            log_request(code, params, details, method, 403)
+            raise cherrypy.HTTPError(403, e.message)
+
         details = None
         method = 'POST'
         code = self.getRequestMessage(method, 'login')
@@ -166,10 +176,31 @@ class WokRoot(Root):
             log_request(code, params, details, method, 400)
             raise cherrypy.HTTPError(400, e.message)
 
+        # check for repetly
+        l = len(self.failed_logins)
+        if l >= 3:
+
+            # verify if timeout is still valid
+            last_try = self.failed_logins[l - 1]
+            if time.time() < (last_try["time"] + self.fail_timeout):
+                _raise_timeout()
         try:
             status = 200
             user_info = auth.login(username, password)
+
+            # user logged sucessfuly: reset counters
+            self.failed_logins = []
+            self.timeout = 30
         except cherrypy.HTTPError, e:
+            # store time and prevent too much tries
+            self.failed_logins.append({"user": username,
+                                       "time": time.time()})
+
+            # more than 3 fails: raise error
+            if len(self.failed_logins) > 3:
+                self.fail_timeout += (len(self.failed_logins) - 3) * 30
+                _raise_timeout()
+
             status = e.status
             raise
         finally:

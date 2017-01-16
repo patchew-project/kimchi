@@ -41,6 +41,7 @@ messages = {
     "WOKAUTH0001E": _("Authentication failed for user '%(username)s'. [Error code: %(code)s]"),
     "WOKAUTH0002E": _("You are not authorized to access Wok. Please, login first."),
     "WOKAUTH0003E": _("Specify %(item)s to login into Wok."),
+    "WOKAUTH0004E": _("You have failed to login in too much attempts. Please, wait for %(seconds)s seconds to try again."),
     "WOKAUTH0005E": _("Invalid LDAP configuration: %(item)s : %(value)s"),
 
     "WOKLOG0001E": _("Invalid filter parameter. Filter parameters allowed: %(filters)s"),
