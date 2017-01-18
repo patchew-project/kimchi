@@ -62,4 +62,6 @@ messages = {
     "WOKRES0001L": _("Request made on resource"),
     "WOKROOT0001L": _("User '%(username)s' login"),
     "WOKROOT0002L": _("User '%(username)s' logout"),
+
+    "WOKCONFIG0001I": _("WoK is going to restart. Existing WoK connections will be closed."),
 }
