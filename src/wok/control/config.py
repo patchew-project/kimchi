@@ -1,7 +1,7 @@
 #
 # Project Wok
 #
-# Copyright IBM Corp, 2016
+# Copyright IBM Corp, 2016-2017
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-from wok.control.base import Resource
+from wok.control.base import Collection, Resource
 from wok.control.utils import UrlSubNode
 
 
@@ -25,6 +25,26 @@ from wok.control.utils import UrlSubNode
 class Config(Resource):
     def __init__(self, model, id=None):
         super(Config, self).__init__(model, id)
+        self.plugins = Plugins(self.model)
+
+    @property
+    def data(self):
+        return self.info
+
+
+class Plugins(Collection):
+    def __init__(self, model):
+        super(Plugins, self).__init__(model)
+        self.resource = Plugin
+
+
+class Plugin(Resource):
+    def __init__(self, model, ident=None):
+        super(Plugin, self).__init__(model, ident)
+        self.ident = ident
+        self.uri_fmt = "/config/plugins/%s"
+        self.enable = self.generate_action_handler('enable')
+        self.disable = self.generate_action_handler('disable')
 
     @property
     def data(self):
