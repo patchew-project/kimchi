@@ -1,7 +1,7 @@
 #
 # Project Wok
 #
-# Copyright IBM Corp, 2015-2016
+# Copyright IBM Corp, 2015-2017
 #
 # Code derived from Project Kimchi
 #
@@ -19,10 +19,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
-import cherrypy
 
-from wok.config import get_base_plugin_uri
-from wok.utils import get_enabled_plugins
+from wok.exception import NotFoundError
+from wok.utils import get_plugins, load_plugin_conf, set_plugin_state
 
 
 class PluginsModel(object):
@@ -30,7 +29,24 @@ class PluginsModel(object):
         pass
 
     def get_list(self):
-        # Will only return plugins that were loaded correctly by WOK and are
-        # properly configured in cherrypy
-        return [plugin for (plugin, config) in get_enabled_plugins()
-                if get_base_plugin_uri(plugin) in cherrypy.tree.apps.keys()]
+        return [plugin for (plugin, config) in get_plugins()]
+
+
+class PluginModel(object):
+    def __init__(self, **kargs):
+        pass
+
+    def lookup(self, name):
+        name = name.encode('utf-8')
+
+        plugin_conf = load_plugin_conf(name)
+        if not plugin_conf:
+            raise NotFoundError("WOKPLUGIN0001E", {'name': name})
+
+        return {"name": name, "enabled": plugin_conf['wok']['enable']}
+
+    def enable(self, name):
+        set_plugin_state(name, True)
+
+    def disable(self, name):
+        set_plugin_state(name, False)
