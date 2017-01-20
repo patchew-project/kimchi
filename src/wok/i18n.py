@@ -62,4 +62,5 @@ messages = {
     "WOKRES0001L": _("Request made on resource"),
     "WOKROOT0001L": _("User '%(username)s' login"),
     "WOKROOT0002L": _("User '%(username)s' logout"),
+    "WOKPLUGIN0001E": _("Unable to find plug-in %(name)s"),
 }
