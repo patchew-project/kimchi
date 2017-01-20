@@ -1,7 +1,7 @@
 #
 # Project Wok
 #
-# Copyright IBM Corp, 2016
+# Copyright IBM Corp, 2016-2017
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,8 @@ import utils
 from functools import partial
 
 from wok.asynctask import AsyncTask
+from wok.utils import set_plugin_state
+from wok.rollbackcontext import RollbackContext
 
 test_server = None
 model = None
@@ -52,6 +54,45 @@ class APITests(unittest.TestCase):
         keys = ["auth", "proxy_port", "websockets_port", "version",
                 "server_root"]
         self.assertEquals(sorted(keys), sorted(conf.keys()))
+
+    def test_config_plugins(self):
+        resp = self.request('/config/plugins')
+        self.assertEquals(200, resp.status)
+
+        plugins = json.loads(resp.read())
+        if len(plugins) == 0:
+            return
+
+        plugin = plugins[0]
+        plugin_state = plugin.get('enabled')
+        plugin_name = plugin.get('name')
+
+        with RollbackContext() as rollback:
+            rollback.prependDefer(set_plugin_state, plugin_name,
+                                  plugin_state)
+
+            resp = self.request('/config/plugins/%s' % plugin_name)
+            self.assertEquals(200, resp.status)
+
+            resp = self.request('/config/plugins/%s/enable' % plugin_name,
+                                '{}', 'POST')
+            self.assertEquals(200, resp.status)
+
+            resp = self.request('/config/plugins')
+            self.assertEquals(200, resp.status)
+            plugins = json.loads(resp.read())
+            plugin = plugins[0]
+            self.assertEqual(plugin.get('enabled'), True)
+
+            resp = self.request('/config/plugins/%s/disable' % plugin_name,
+                                '{}', 'POST')
+            self.assertEquals(200, resp.status)
+
+            resp = self.request('/config/plugins')
+            self.assertEquals(200, resp.status)
+            plugins = json.loads(resp.read())
+            plugin = plugins[0]
+            self.assertEqual(plugin.get('enabled'), False)
 
     def test_user_log(self):
         # Login and logout to make sure there there are entries in user log

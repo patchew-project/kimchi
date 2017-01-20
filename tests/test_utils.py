@@ -19,10 +19,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
+import mock
+import os
+import tempfile
 import unittest
 
 from wok.exception import InvalidParameter
-from wok.utils import convert_data_size
+from wok.rollbackcontext import RollbackContext
+from wok.utils import convert_data_size, set_plugin_state
 
 
 class UtilsTests(unittest.TestCase):
@@ -69,3 +73,48 @@ class UtilsTests(unittest.TestCase):
 
         for d in success_data:
             self.assertEquals(d['got'], d['want'])
+
+    def _get_fake_config_file_content(self, enable=True):
+        return """\
+[wok]
+# Enable plugin on Wok server (values: True|False)
+enable = %s
+
+[fakeplugin]
+# Yet another comment on this config file
+very_interesting_option = True
+""" % str(enable)
+
+    def _create_fake_config_file(self):
+        _, tmp_file_name = tempfile.mkstemp(suffix='.conf')
+
+        config_contents = self._get_fake_config_file_content()
+        with open(tmp_file_name, 'w') as f:
+            f.writelines(config_contents)
+
+        return tmp_file_name
+
+    @mock.patch('wok.utils.get_plugin_config_file')
+    def test_set_plugin_state(self, mock_config_file):
+        with RollbackContext() as rollback:
+
+            config_file_name = self._create_fake_config_file()
+            rollback.prependDefer(os.remove, config_file_name)
+
+            mock_config_file.return_value = config_file_name
+
+            set_plugin_state('pluginA', False)
+            with open(config_file_name, 'r') as f:
+                updated_conf = f.read()
+                self.assertEqual(
+                    updated_conf,
+                    self._get_fake_config_file_content(enable=False)
+                )
+
+            set_plugin_state('pluginA', True)
+            with open(config_file_name, 'r') as f:
+                updated_conf = f.read()
+                self.assertEqual(
+                    updated_conf,
+                    self._get_fake_config_file_content(enable=True)
+                )
