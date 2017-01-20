@@ -35,7 +35,6 @@ import traceback
 import xml.etree.ElementTree as ET
 
 from cherrypy.lib.reprconf import Parser
-from configobj import ConfigObj
 from datetime import datetime, timedelta
 from multiprocessing import Process, Queue
 from threading import Timer
@@ -117,9 +116,24 @@ def set_plugin_state(name, state):
     if not plugin_conf:
         return
 
-    config = ConfigObj(plugin_conf)
-    config['wok']['enable'] = str(state)
-    config.write()
+    config_contents = None
+
+    with open(plugin_conf, 'r') as f:
+        config_contents = f.readlines()
+
+    wok_section_found = False
+
+    for i in range(0, len(config_contents)):
+        if config_contents[i] == '[wok]\n':
+            wok_section_found = True
+            continue
+
+        if config_contents[i].startswith('enable =') and wok_section_found:
+            config_contents[i] = 'enable = %s\n' % str(state)
+            break
+
+    with open(plugin_conf, 'w') as f:
+        f.writelines(config_contents)
 
 
 def get_all_tabs():

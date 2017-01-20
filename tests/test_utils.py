@@ -76,12 +76,17 @@ class UtilsTests(unittest.TestCase):
 
     def _get_fake_config_file_content(self, enable=True):
         return """\
+[a_random_section]
+# a random section for testing purposes
+enable = 1
+
 [wok]
 # Enable plugin on Wok server (values: True|False)
 enable = %s
 
 [fakeplugin]
 # Yet another comment on this config file
+enable = 2
 very_interesting_option = True
 """ % str(enable)
 
