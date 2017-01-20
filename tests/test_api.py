@@ -94,6 +94,10 @@ class APITests(unittest.TestCase):
             plugin = plugins[0]
             self.assertEqual(plugin.get('enabled'), False)
 
+    def test_plugins_api_404(self):
+        resp = self.request('/plugins')
+        self.assertEquals(404, resp.status)
+
     def test_user_log(self):
         # Login and logout to make sure there there are entries in user log
         hdrs = {'AUTHORIZATION': '',
