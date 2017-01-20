@@ -1,7 +1,7 @@
 #
 # Project Wok
 #
-# Copyright IBM Corp, 2015-2016
+# Copyright IBM Corp, 2015-2017
 #
 # Code derived from Project Kimchi
 #
@@ -35,6 +35,7 @@ import traceback
 import xml.etree.ElementTree as ET
 
 from cherrypy.lib.reprconf import Parser
+from configobj import ConfigObj
 from datetime import datetime, timedelta
 from multiprocessing import Process, Queue
 from threading import Timer
@@ -57,13 +58,21 @@ def is_digit(value):
         return False
 
 
-def _load_plugin_conf(name):
+def get_plugin_config_file(name):
     plugin_conf = PluginPaths(name).conf_file
     if not os.path.exists(plugin_conf):
         cherrypy.log.error_log.error("Plugin configuration file %s"
                                      " doesn't exist." % plugin_conf)
-        return
+        return None
+    return plugin_conf
+
+
+def load_plugin_conf(name):
     try:
+        plugin_conf = get_plugin_config_file(name)
+        if not plugin_conf:
+            return None
+
         return Parser().dict_from_file(plugin_conf)
     except ValueError as e:
         cherrypy.log.error_log.error("Failed to load plugin "
@@ -71,7 +80,7 @@ def _load_plugin_conf(name):
                                      (plugin_conf, e.message))
 
 
-def get_enabled_plugins():
+def get_plugins(enabled_only=False):
     plugin_dir = paths.plugins_dir
     try:
         dir_contents = os.listdir(plugin_dir)
@@ -79,12 +88,34 @@ def get_enabled_plugins():
         return
     for name in dir_contents:
         if os.path.isdir(os.path.join(plugin_dir, name)):
-            plugin_config = _load_plugin_conf(name)
+            plugin_config = load_plugin_conf(name)
+            if not plugin_config:
+                continue
             try:
-                if plugin_config['wok']['enable']:
-                    yield (name, plugin_config)
+                if plugin_config['wok']['enable'] is None:
+                    continue
+
+                plugin_enabled = plugin_config['wok']['enable']
+                if enabled_only and not plugin_enabled:
+                    continue
+
+                yield (name, plugin_config)
             except (TypeError, KeyError):
                 continue
+
+
+def get_enabled_plugins():
+    return get_plugins(enabled_only=True)
+
+
+def set_plugin_state(name, state):
+    plugin_conf = get_plugin_config_file(name)
+    if not plugin_conf:
+        return
+
+    config = ConfigObj(plugin_conf)
+    config['wok']['enable'] = str(state)
+    config.write()
 
 
 def get_all_tabs():
