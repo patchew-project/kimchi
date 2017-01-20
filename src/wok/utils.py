@@ -128,7 +128,9 @@ def set_plugin_state(name, state):
             wok_section_found = True
             continue
 
-        if config_contents[i].startswith('enable =') and wok_section_found:
+        if (config_contents[i].startswith('enable =') or
+                config_contents[i].startswith('enable=')) and \
+                wok_section_found:
             config_contents[i] = 'enable = %s\n' % str(state)
             break
 

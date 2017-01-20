@@ -21,6 +21,14 @@ from wok.control.base import Collection, Resource
 from wok.control.utils import UrlSubNode
 
 
+PLUGIN_REQUESTS = {
+    'POST': {
+        'enable': "WOKPLUGIN0001L",
+        'disable': "WOKPLUGIN0002L",
+    },
+}
+
+
 @UrlSubNode("config")
 class Config(Resource):
     def __init__(self, model, id=None):
@@ -43,6 +51,7 @@ class Plugin(Resource):
         super(Plugin, self).__init__(model, ident)
         self.ident = ident
         self.uri_fmt = "/config/plugins/%s"
+        self.log_map = PLUGIN_REQUESTS
         self.enable = self.generate_action_handler('enable')
         self.disable = self.generate_action_handler('disable')
 

@@ -82,6 +82,22 @@ enable = 1
 
 [wok]
 # Enable plugin on Wok server (values: True|False)
+enable=%s
+
+[fakeplugin]
+# Yet another comment on this config file
+enable = 2
+very_interesting_option = True
+""" % str(enable)
+
+    def _get_config_file_template(self, enable=True):
+        return """\
+[a_random_section]
+# a random section for testing purposes
+enable = 1
+
+[wok]
+# Enable plugin on Wok server (values: True|False)
 enable = %s
 
 [fakeplugin]
@@ -113,7 +129,7 @@ very_interesting_option = True
                 updated_conf = f.read()
                 self.assertEqual(
                     updated_conf,
-                    self._get_fake_config_file_content(enable=False)
+                    self._get_config_file_template(enable=False)
                 )
 
             set_plugin_state('pluginA', True)
@@ -121,5 +137,5 @@ very_interesting_option = True
                 updated_conf = f.read()
                 self.assertEqual(
                     updated_conf,
-                    self._get_fake_config_file_content(enable=True)
+                    self._get_config_file_template(enable=True)
                 )
