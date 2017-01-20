@@ -1,7 +1,7 @@
 /*
  * Project Wok
  *
- * Copyright IBM Corp, 2015-2016
+ * Copyright IBM Corp, 2015-2017
  *
  * Code derived from Project Kimchi
  *
@@ -143,16 +143,20 @@ wok.main = function() {
         var tabs = retrieveTabs('wok', wokConfigUrl);
         wok.listPlugins(function(plugins) {
             $(plugins).each(function(i, p) {
+                if (p.enabled === false) {
+                    return true;
+                }
+
                 var url = wok.substitute(pluginConfigUrl, {
-                    plugin: p
+                    plugin: p.name
                 });
                 var i18nUrl = wok.substitute(pluginI18nUrl, {
-                    plugin: p
+                    plugin: p.name
                 });
                 wok.getI18n(function(i18nObj){ $.extend(i18n, i18nObj)},
                             function(i18nObj){ //i18n is not define by plugin
                             }, i18nUrl, true);
-                var pluginTabs = retrieveTabs(p, url);
+                var pluginTabs = retrieveTabs(p.name, url);
                 if(pluginTabs.length > 0){
                     tabs.push.apply(tabs, pluginTabs);
                 }
