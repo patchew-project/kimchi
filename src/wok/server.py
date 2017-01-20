@@ -1,7 +1,7 @@
 #
 # Project Wok
 #
-# Copyright IBM Corp, 2015-2016
+# Copyright IBM Corp, 2015-2017
 #
 # Code derived from Project Kimchi
 #
@@ -138,6 +138,11 @@ class Server(object):
         # Handling running mode
         if not dev_env:
             cherrypy.config.update({'environment': 'production'})
+
+        test_mode = False
+        if hasattr(options, 'test') and options.test is True:
+            test_mode = True
+        cherrypy.config.update({'test_mode': test_mode})
 
         if hasattr(options, 'model'):
             model_instance = options.model

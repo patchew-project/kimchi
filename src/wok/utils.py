@@ -88,6 +88,10 @@ def get_plugins(enabled_only=False):
         return
     for name in dir_contents:
         if os.path.isdir(os.path.join(plugin_dir, name)):
+            test_mode = cherrypy.config.get('test_mode', False)
+            if name == 'sample' and not test_mode:
+                continue
+
             plugin_config = load_plugin_conf(name)
             if not plugin_config:
                 continue
