@@ -38,10 +38,13 @@ messages = {
     "WOKASYNC0003E": _("Timeout of %(seconds)s seconds expired while running task '%(task)s."),
     "WOKASYNC0004E": _("Unable to kill task due error: %(err)s"),
 
-    "WOKAUTH0001E": _("Authentication failed for user '%(username)s'. [Error code: %(code)s]"),
+    "WOKAUTH0001E": _("The username or password you entered is incorrect. Please try again"),
     "WOKAUTH0002E": _("You are not authorized to access Wok. Please, login first."),
-    "WOKAUTH0003E": _("Specify %(item)s to login into Wok."),
+    "WOKAUTH0003E": _("Specify username to login into Wok."),
+    "WOKAUTH0004E": _("You have failed to login in too much attempts. Please, wait for %(seconds)s seconds to try again."),
     "WOKAUTH0005E": _("Invalid LDAP configuration: %(item)s : %(value)s"),
+    "WOKAUTH0006E": _("Specify password to login into Wok."),
+    "WOKAUTH0007E": _("You need to specify username and password to login into Wok."),
 
     "WOKLOG0001E": _("Invalid filter parameter. Filter parameters allowed: %(filters)s"),
     "WOKLOG0002E": _("Creation of log file failed: %(err)s"),
