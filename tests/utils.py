@@ -24,9 +24,7 @@ import base64
 import cherrypy
 import grp
 import httplib
-import inspect
 import os
-import ssl
 import sys
 import threading
 import time
@@ -40,7 +38,7 @@ from wok.exception import NotFoundError, OperationFailed
 from wok.utils import wok_log
 
 HOST = '0.0.0.0'
-PROXY_PORT = 8001
+PORT = 8010
 
 fake_user = {'root': 'letmein!'}
 
@@ -91,7 +89,7 @@ if sys.version_info[:2] == (2, 6):
 def run_server(test_mode, environment='dev', server_root=''):
 
     args = type('_', (object,),
-                {'cherrypy_port': 8010, 'max_body_size': '4*1024',
+                {'cherrypy_port': PORT, 'max_body_size': '4*1024',
                  'test': test_mode, 'access_log': '/dev/null',
                  'error_log': '/dev/null', 'environment': environment,
                  'log_level': 'debug', 'session_timeout': 10,
@@ -122,13 +120,7 @@ def _request(conn, path, data, method, headers):
 
 
 def request(path, data=None, method='GET', headers=None):
-    # verify if HTTPSConnection has context parameter
-    if "context" in inspect.getargspec(httplib.HTTPSConnection.__init__).args:
-        context = ssl._create_unverified_context()
-        conn = httplib.HTTPSConnection(HOST, PROXY_PORT, context=context)
-    else:
-        conn = httplib.HTTPSConnection(HOST, PROXY_PORT)
-
+    conn = httplib.HTTPConnection(HOST, PORT)
     return _request(conn, path, data, method, headers)
 
 
