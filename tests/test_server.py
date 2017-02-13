@@ -167,7 +167,6 @@ class ServerTests(unittest.TestCase):
     def test_auth_unprotected(self):
         hdrs = {'AUTHORIZATION': ''}
         uris = ['/js/wok.min.js',
-                '/css/theme-default.min.css',
                 '/images/favicon.png',
                 '/libs/jquery/jquery.min.js',
                 '/login.html',
@@ -175,6 +174,7 @@ class ServerTests(unittest.TestCase):
 
         for uri in uris:
             resp = self.request(uri, None, 'HEAD', hdrs)
+            print "\n\naaaaaaaaaaaaaaaa   ", uri
             self.assertEquals(200, resp.status)
 
     def test_auth_protected(self):
