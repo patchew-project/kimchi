@@ -1,7 +1,7 @@
 #
 # Project Wok
 #
-# Copyright IBM Corp, 2016
+# Copyright IBM Corp, 2016-2017
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -19,12 +19,22 @@
 
 from datetime import datetime
 
+from wok import config
 from wok.exception import NotFoundError, OperationFailed
 from wok.message import WokMessage
+from wok.pushserver import PushServer
 from wok.utils import wok_log
 
 
 notificationsStore = {}
+push_server = None
+
+
+def send_websocket_notification(message):
+    global push_server
+
+    if push_server:
+        push_server.send_notification(message)
 
 
 def add_notification(code, args=None, plugin_name=None):
@@ -57,7 +67,11 @@ def del_notification(code):
 
 class NotificationsModel(object):
     def __init__(self, **kargs):
-        pass
+        global push_server
+
+        test_mode = config.config.get('server', 'test').lower() == 'true'
+        if not test_mode:
+            push_server = PushServer()
 
     def get_list(self):
         global notificationsStore

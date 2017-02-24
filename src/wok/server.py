@@ -25,8 +25,7 @@ import logging
 import logging.handlers
 import os
 
-from wok import auth
-from wok import config
+from wok import auth, config, websocket
 from wok.config import config as configParser
 from wok.config import WokConfig
 from wok.control import sub_nodes
@@ -158,6 +157,11 @@ class Server(object):
 
         cherrypy.tree.mount(WokRoot(model.Model(), dev_env),
                             options.server_root, self.configObj)
+
+        test_mode = config.config.get('server', 'test').lower() == 'true'
+        if not test_mode:
+            ws_proxy = websocket.new_ws_proxy()
+            cherrypy.engine.subscribe('exit', ws_proxy.terminate)
 
         self._load_plugins()
         cherrypy.lib.sessions.init()

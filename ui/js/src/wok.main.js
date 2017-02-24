@@ -29,6 +29,41 @@ wok.getConfig(function(result) {
     wok.config = {};
 });
 
+
+wok.notificationListeners = {};
+wok.addNotificationListener = function(name, func) {
+    wok.notificationListeners[name] = func;
+    $(window).one("hashchange", function() {
+        delete wok.notificationListeners[name];
+    });
+};
+
+wok.notificationsWebSocket = undefined;
+wok.startNotificationWebSocket = function () {
+    var addr = window.location.hostname + ':' + window.location.port;
+    var token = wok.urlSafeB64Encode('woknotifications').replace(/=*$/g, "");
+    var url = 'wss://' + addr + '/websockify?token=' + token;
+    wok.notificationsWebSocket = new WebSocket(url, ['base64']);
+
+    wok.notificationsWebSocket.onmessage = function(event) {
+        var message = window.atob(event.data);
+        for (name in wok.notificationListeners) {
+            func = wok.notificationListeners[name];
+            func(message);
+        }
+    };
+
+    sessionStorage.setItem('wokNotificationWebSocket', 'true');
+    var heartbeat = setInterval(function() {
+        wok.notificationsWebSocket.send(window.btoa('heartbeat'));
+    }, 30000);
+
+    wok.notificationsWebSocket.onclose = function() {
+        clearInterval(heartbeat);
+    };
+};
+
+
 wok.main = function() {
     wok.isLoggingOut = false;
     wok.popable();
@@ -395,6 +430,9 @@ wok.main = function() {
 
         // Set handler for help button
         $('#btn-help').on('click', wok.openHelp);
+
+        // start WebSocket
+        wok.startNotificationWebSocket();
     };
 
     var initUI = function() {
