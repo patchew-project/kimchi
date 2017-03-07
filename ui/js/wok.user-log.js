@@ -153,6 +153,18 @@ wok.initUserLogContent = function() {
         $("#user-log-grid").bootgrid("search");
         wok.initUserLogConfigGridData();
     });
+
+    wok.addNotificationListener(function(message) {
+        var msg_attr = message.split(":");
+        if (msg_attr.length != 2) {
+            return;
+	}
+        var method = msg_attr[0];
+        var target = msg_attr[1];
+        if (method === "POST" && target === '/wok/logs') {
+            $("#refresh-button").click();
+        }
+    });
 };
 
 wok.initUserLogWindow = function() {

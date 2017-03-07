@@ -29,6 +29,46 @@ wok.getConfig(function(result) {
     wok.config = {};
 });
 
+wok.notificationListeners = [];
+wok.addNotificationListener = function(func) {
+    wok.notificationListeners.push(func);
+    $(window).one("hashchange", function() {
+        var del_index = wok.notificationListeners.indexOf(func);
+        wok.notificationListeners.splice(del_index, 1);
+    });
+};
+
+wok.notificationsWebSocket = undefined;
+wok.startNotificationWebSocket = function () {
+    var addr = window.location.hostname + ':' + window.location.port;
+    var token = wok.urlSafeB64Encode('woknotifications').replace(/=*$/g, "");
+    var url = 'wss://' + addr + '/websockify?token=' + token;
+    wok.notificationsWebSocket = new WebSocket(url, ['base64']);
+
+    wok.notificationsWebSocket.onmessage = function(event) {
+        var buffer_rcv = window.atob(event.data);
+        var messages = buffer_rcv.split("//EOM//");
+        for (var i = 0; i < messages.length; i++) {
+            if (messages[i] === "") {
+                continue;
+	    }
+            for (var j = 0; j < wok.notificationListeners.length; j++) {
+                wok.notificationListeners[j](messages[i]);
+            }
+        }
+    };
+
+    sessionStorage.setItem('wokNotificationWebSocket', 'true');
+    var heartbeat = setInterval(function() {
+        wok.notificationsWebSocket.send(window.btoa('heartbeat'));
+    }, 30000);
+
+    wok.notificationsWebSocket.onclose = function() {
+        clearInterval(heartbeat);
+    };
+};
+
+
 wok.main = function() {
     wok.isLoggingOut = false;
     wok.popable();
@@ -395,6 +435,9 @@ wok.main = function() {
 
         // Set handler for help button
         $('#btn-help').on('click', wok.openHelp);
+
+        // start WebSocket
+        wok.startNotificationWebSocket();
     };
 
     var initUI = function() {
