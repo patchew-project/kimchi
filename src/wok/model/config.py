@@ -18,11 +18,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 
 import cherrypy
+import platform
 import time
 
 from wok.config import config, get_version
 from wok.model.notifications import add_notification
 from wok.utils import wok_log
+
+ARCH = platform.machine()
 
 
 class ConfigModel(object):
@@ -34,6 +37,7 @@ class ConfigModel(object):
                 'websockets_port': config.get('server', 'websockets_port'),
                 'auth': config.get('authentication', 'method'),
                 'server_root': config.get('server', 'server_root'),
+                'arch': ARCH,
                 'version': get_version()}
 
     def reload(self, name):

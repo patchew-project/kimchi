@@ -12,6 +12,8 @@ Contains information about the application environment and configuration.
     * proxy_port: SSL port to list on
     * websockets_port: Port for websocket proxy to listen on
     * auth: Authentication method used to log in to Wok
+    * server_root: Wok root API path
+    * arch: System architecture
     * version: Wok version
 * **POST**: *See Task Actions*
 

@@ -52,7 +52,7 @@ class APITests(unittest.TestCase):
     def test_config(self):
         resp = self.request('/config').read()
         conf = json.loads(resp)
-        keys = ["auth", "proxy_port", "websockets_port", "version",
+        keys = ["arch", "auth", "proxy_port", "websockets_port", "version",
                 "server_root"]
         self.assertEquals(sorted(keys), sorted(conf.keys()))
 

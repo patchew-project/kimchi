@@ -30,7 +30,7 @@ class ConfigModelTests(unittest.TestCase):
         config = inst.config_lookup('')
         self.assertItemsEqual(
             ['proxy_port', 'websockets_port', 'auth',
-             'server_root', 'version'],
+             'server_root', 'arch', 'version'],
             config.keys()
         )
 
